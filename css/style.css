@@ -1228,3 +1228,134 @@ canvas {
 @keyframes verifyBlink{0%,26%{background:#fff19a;box-shadow:0 0 34px rgba(255,230,100,.85)}27%,100%{background:#52667f;box-shadow:none}}
 .arrivalLegend{position:absolute;right:18px;bottom:264px;padding:8px 12px;border-radius:14px;font-size:11px;display:none}
 @media(max-width:850px){.weatherBanner{top:auto;bottom:190px}.verifyBoard{grid-template-columns:1fr}}
+
+/* =========================================================
+   v2.1 모바일 최적화 + 개별 패널 최소화
+   ========================================================= */
+.minimizablePanel{position:absolute}
+.panelMinBtn{
+  position:absolute;right:7px;top:7px;z-index:30;
+  width:30px;height:30px;padding:0;border-radius:10px;
+  border:2px solid rgba(255,255,255,.25);
+  background:rgba(16,37,82,.88);color:#fff;
+  font-size:18px;font-weight:1000;line-height:1;
+  display:grid;place-items:center;pointer-events:auto;cursor:pointer;
+  box-shadow:0 3px 0 rgba(5,16,40,.25)
+}
+.minimizablePanel.panelMinimized{
+  width:46px!important;height:42px!important;min-width:46px!important;min-height:42px!important;
+  padding:0!important;overflow:visible!important;border-radius:14px!important
+}
+.minimizablePanel.panelMinimized > *:not(.panelMinBtn){display:none!important}
+.minimizablePanel.panelMinimized .panelMinBtn{right:6px;top:4px;width:32px;height:32px}
+#mission .panelMinBtn{right:8px;top:48px}
+#mission.panelMinimized .panelMinBtn{right:6px;top:4px}
+#tutorialCoach .panelMinBtn{pointer-events:auto}
+
+/* 작은 화면에서 모달은 화면 밖으로 넘치지 않도록 내부 스크롤 */
+#modal{max-height:calc(100% - 24px);overflow-y:auto;overscroll-behavior:contain}
+.systemPanel{max-height:calc(100% - 24px);overflow-y:auto}
+
+@media(max-width:760px){
+  html,body,#root{height:100%;height:100dvh;min-height:100%;touch-action:none}
+  .ui{inset:0}
+  .glass{border-width:2px;box-shadow:0 6px 0 rgba(8,18,43,.18),0 12px 24px rgba(0,0,0,.16)}
+
+  #mission{
+    left:8px;top:max(8px,env(safe-area-inset-top));
+    width:calc(100% - 16px);max-width:none;
+    padding:10px 136px 10px 11px;border-radius:16px
+  }
+  #mission .eyebrow{font-size:8px}.stageLabel{font-size:8px}
+  .missionTitle{font-size:15px}.missionText{font-size:10.5px;line-height:1.35}
+  .guideBtn{right:66px!important;top:8px!important;min-width:58px!important;padding:6px!important;font-size:8px!important}
+  .pauseBtn{right:8px!important;top:8px!important;min-width:52px!important;padding:6px!important;font-size:8px!important}
+  #mission .panelMinBtn{right:8px;top:42px;width:28px;height:28px;font-size:16px}
+
+  #prepChecklist{left:8px;top:116px;width:min(260px,calc(100% - 16px));padding:9px 10px;border-radius:16px}
+  .prepHead b{font-size:11px}.prepLoad{font-size:9px}.prepItem{font-size:9.5px;padding:6px 7px}.prepKg{font-size:8.5px}
+
+  #telemetry{right:8px;top:116px;width:190px;padding:9px 10px;border-radius:16px}
+  .teleMain{font-size:22px}.teleLabel{font-size:8px}.teleSub{font-size:9px;line-height:1.35}
+
+  #cameraPill{top:auto;bottom:154px;padding:7px 10px;font-size:9px;max-width:58%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #inventory{left:8px;bottom:116px;width:min(330px,calc(100% - 16px));padding:9px 10px;border-radius:16px}
+  .invHead{font-size:10px}.tinyBtn{padding:6px 8px;font-size:9px}.chips{gap:5px;margin-top:6px}.chip{font-size:9px;padding:4px 7px}
+
+  #instruments{left:8px;bottom:116px;width:240px;padding:8px 10px;border-radius:16px}
+  .inst{grid-template-columns:56px 1fr 48px;gap:6px;margin:6px 0;font-size:9px}.track{height:8px}
+
+  #navcard{right:8px;bottom:116px;width:168px;height:120px;border-radius:16px}
+  #navcard.panelMinimized{right:8px;bottom:116px}
+
+  #progress{bottom:106px;width:56%;height:9px}
+  #dockPrompt{bottom:146px;max-width:calc(100% - 24px);padding:8px 10px;font-size:10px;text-align:center}
+  #toast{bottom:200px;max-width:calc(100% - 20px);font-size:10px;padding:8px 10px;white-space:normal;text-align:center}
+  .hazardBanner,.weatherBanner{top:auto;bottom:198px;max-width:calc(100% - 24px);font-size:10px;padding:8px 10px;text-align:center}
+
+  #tutorialCoach{left:8px;top:116px;transform:none;width:calc(100% - 16px);padding:10px 42px 10px 10px;border-radius:16px;text-align:left}
+  .tutorialCoachTitle{font-size:14px}.tutorialCoachText{font-size:10px}.tutorialCoachProgress{justify-content:flex-start}
+
+  /* 모바일 운항은 별도 터치 패드 대신 동일한 운항 버튼을 사용 */
+  #touch{display:none!important}
+  #mouseControls{
+    left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom));transform:none;
+    width:auto!important;padding:6px;border-radius:15px;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px;
+    background:rgba(20,42,88,.78);backdrop-filter:blur(6px)
+  }
+  .mouseCtrl{min-height:44px!important;font-size:9px;border-radius:11px;box-shadow:0 3px 0 rgba(16,58,107,.28)}
+  .mouseCtrl.small,.mouseCtrl.work{min-height:40px}
+
+  #modal{width:calc(100% - 14px);padding:16px 13px;border-radius:20px;max-height:calc(100% - 14px)}
+  #modal h1{font-size:30px;margin:10px 0 8px}#modal h2{font-size:22px}
+  #modal p{font-size:12px;line-height:1.45}.actions{gap:7px;margin-top:14px}.btn{padding:10px 12px;font-size:11px;border-radius:13px}
+  .repairWrap{gap:10px;margin-top:10px}.repairScene{min-height:178px;padding:10px}.repairSide{padding:11px}.repairQuestion{font-size:16px}.repairOption{padding:10px;font-size:11px}
+  .equipmentHero span{font-size:52px}.equipmentHero b{font-size:12px}.cleanLens{width:165px;height:165px}.lensAlign{height:150px}.mapAlign{height:165px}
+  .movePad{grid-template-columns:repeat(3,52px);grid-template-rows:repeat(2,48px)}.movePad button{font-size:18px}
+  .stageGrid{grid-template-columns:1fr 1fr;gap:7px;max-height:56vh}.stageCard{min-height:106px;padding:9px}.stageIcon{font-size:24px}.stageCard b{font-size:12px}.stageCard small{font-size:9px}
+  .helpManualGrid{max-height:58vh}.manualCard{padding:10px}.manualCard b{font-size:12px}.manualCard p{font-size:10px!important}
+
+  .panelMinBtn{width:28px;height:28px;font-size:16px;right:5px;top:5px}
+  .minimizablePanel.panelMinimized{width:40px!important;height:38px!important;min-width:40px!important;min-height:38px!important}
+  .minimizablePanel.panelMinimized .panelMinBtn{width:28px;height:28px;right:5px;top:3px}
+}
+
+@media(max-width:430px){
+  #mission{padding-right:126px}.missionText{max-height:42px;overflow:hidden}
+  #prepChecklist{width:220px}#telemetry{width:164px}
+  #navcard{width:145px;height:104px}
+  #mouseControls{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .mouseCtrl{font-size:8.5px;padding:4px}
+}
+
+@media(orientation:landscape) and (max-height:520px){
+  #mission{width:44%;max-width:430px}.missionText{display:none}
+  #prepChecklist{top:86px;max-height:48%;overflow:auto}
+  #telemetry{top:8px;right:8px}
+  #navcard{bottom:66px;width:150px;height:105px}
+  #instruments{bottom:66px;width:220px}
+  #inventory{bottom:66px;max-width:300px}
+  #cameraPill{bottom:64px}
+  #mouseControls{bottom:6px}
+  #progress{bottom:60px}
+  #dockPrompt{bottom:100px}
+  #toast{bottom:142px}
+}
+
+
+/* v2.1.1 모바일 long-press 기본 메뉴 방지 */
+#root, #root *{
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+}
+button,.btn,.tinyBtn,.mouseCtrl,.touchBtn,.panelMinBtn,.guideBtn,.pauseBtn{
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+  touch-action:manipulation;
+}
+canvas,img{
+  -webkit-user-drag:none;user-drag:none;
+  -webkit-touch-callout:none;
+}

@@ -54,3 +54,16 @@ const manualBtn=$('manualBtn');if(manualBtn)manualBtn.onclick=()=>showManual('me
 const guideBtn=$('guideBtn');if(guideBtn)guideBtn.onclick=()=>showManual('game');
 $('weightBtn').onclick=()=>showWeightTable();
 addEventListener('pointerdown',()=>{if(typeof unlockGameAudio==='function')unlockGameAudio();if(typeof unlockWildlifeAudio==='function')unlockWildlifeAudio()},{passive:true});
+
+
+// 모바일에서 버튼을 길게 눌렀을 때 복사/선택/컨텍스트 메뉴가 뜨지 않도록 방지합니다.
+const gameRoot=document.getElementById('root');
+if(gameRoot){
+  gameRoot.addEventListener('contextmenu',e=>e.preventDefault());
+  gameRoot.addEventListener('dragstart',e=>e.preventDefault());
+  gameRoot.addEventListener('selectstart',e=>e.preventDefault());
+}
+document.querySelectorAll('button,.btn,.tinyBtn,.mouseCtrl,.touchBtn,.panelMinBtn,.guideBtn,.pauseBtn').forEach(el=>{
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+  el.addEventListener('dragstart',e=>e.preventDefault());
+});
