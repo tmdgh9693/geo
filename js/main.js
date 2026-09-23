@@ -6,26 +6,54 @@ else if(qs.get('autostart')==='office'){selectStage(0,false)}
 else if(qs.get('autostart')==='gather'){selectStage(0,false);startGather()}
 if(qs.get('snapshot')==='1'){const now=performance.now();update(.016,now);draw(now)}else requestAnimationFrame(loop);
 
-
-// v2.1.2: CSS 화면 크기에 맞춰 Canvas 내부 해상도도 동기화한다.
-(function installResponsiveCanvas(){
+// v2.1.5: 고정 화면비를 사용하지 않고 실제 사용자 viewport를 그대로 사용한다.
+(function installResponsiveViewport(){
   let resizeTimer=0;
-  function syncCanvasResolution(){
-    if(!canvas) return;
-    const rect=canvas.getBoundingClientRect();
-    if(!rect.width||!rect.height) return;
-    // 게임 좌표계는 1920x1080으로 유지하되 CSS가 사용자 화면에 맞춰 표시한다.
-    // 고DPI 모바일에서 지나친 메모리 사용을 피하기 위해 DPR은 2까지만 사용한다.
-    const dpr=Math.min(window.devicePixelRatio||1,2);
-    canvas.style.width=rect.width+'px';
-    canvas.style.height=rect.height+'px';
-    if(mini){
-      const mr=mini.getBoundingClientRect();
-      if(mr.width&&mr.height){mini.style.width=mr.width+'px';mini.style.height=mr.height+'px'}
-    }
+  const root=document.getElementById('root');
+  const controls=document.getElementById('mouseControls');
+  function viewportSize(){
+    const vv=window.visualViewport;
+    return {
+      w:Math.max(1,Math.round(vv?vv.width:window.innerWidth)),
+      h:Math.max(1,Math.round(vv?vv.height:window.innerHeight))
+    };
   }
-  function schedule(){clearTimeout(resizeTimer);resizeTimer=setTimeout(syncCanvasResolution,40)}
+  function syncControlReserve(){
+    if(!controls) return;
+    const cs=getComputedStyle(controls);
+    const visible=cs.display!=='none' && cs.visibility!=='hidden';
+    const rect=visible?controls.getBoundingClientRect():{height:0};
+    const reserve=visible?Math.ceil(rect.height+12):0;
+    document.documentElement.style.setProperty('--controls-reserve',reserve+'px');
+    if(root) root.dataset.controlsVisible=visible?'true':'false';
+  }
+  function syncLayout(){
+    const {w,h}=viewportSize();
+    document.documentElement.style.setProperty('--app-w',w+'px');
+    document.documentElement.style.setProperty('--app-h',h+'px');
+    document.documentElement.style.setProperty('--app-short',Math.min(w,h)+'px');
+    document.documentElement.style.setProperty('--app-long',Math.max(w,h)+'px');
+    const orientation=w>=h?'landscape':'portrait';
+    if(root){
+      root.dataset.orientation=orientation;
+      root.dataset.compact=(w<760||h<560)?'true':'false';
+      root.dataset.lowHeight=h<500?'true':'false';
+    }
+    // 논리 렌더링 좌표는 기존 게임 좌표계를 유지하고, CSS 표시영역만 실제 viewport를 100% 사용한다.
+    if(canvas){ canvas.width=W; canvas.height=H; }
+    if(mini){ mini.width=310; mini.height=220; }
+    requestAnimationFrame(syncControlReserve);
+  }
+  function schedule(){ clearTimeout(resizeTimer); resizeTimer=setTimeout(syncLayout,16); }
   window.addEventListener('resize',schedule,{passive:true});
-  window.addEventListener('orientationchange',schedule,{passive:true});
-  syncCanvasResolution();
+  window.addEventListener('orientationchange',()=>{syncLayout();setTimeout(syncLayout,80);setTimeout(syncLayout,240);},{passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',schedule,{passive:true});
+    window.visualViewport.addEventListener('scroll',schedule,{passive:true});
+  }
+  if(controls){
+    new MutationObserver(()=>requestAnimationFrame(syncControlReserve)).observe(controls,{attributes:true,attributeFilter:['style','class']});
+    if('ResizeObserver' in window) new ResizeObserver(()=>syncControlReserve()).observe(controls);
+  }
+  syncLayout();
 })();

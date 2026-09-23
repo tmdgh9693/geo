@@ -9,7 +9,7 @@ let seaVerifyState=null, repairedMainTarget=false, returnToOfficeActive=false, r
 const WORK_SPEED_KNOTS=5, WORK_SPEED_UNITS=WORK_SPEED_KNOTS*7.6, ARRIVAL_RADIUS=420;
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r) }
 function showToast(t) { ui.toast.textContent = t; ui.toast.classList.add('on'); toastTime = 2.25 }
-function showModal(html) { ui.modal.innerHTML = html; ui.modal.style.display = 'block' } function hideModal() { ui.modal.style.display = 'none' }
+function showModal(html) { ui.modal.innerHTML = html; ui.modal.style.display = 'flex'; requestAnimationFrame(()=>{ ui.modal.scrollTop=0; }); } function hideModal() { ui.modal.style.display = 'none' }
 function hex(a, b, c, d = 1) { return `rgba(${a},${b},${c},${d})` }
 function text(txt, x, y, size = 16, color = '#fff', align = 'left', weight = 700) { ctx.font = `${weight} ${size}px Trebuchet MS,Inter,system-ui,sans-serif`; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(txt, x, y); ctx.textAlign = 'left' }
 function modalIsOpen() { return getComputedStyle(ui.modal).display !== 'none' }
