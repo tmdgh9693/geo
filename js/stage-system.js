@@ -91,16 +91,7 @@ const TUTORIAL_STEPS=[
   {title:'작업 지점 접근',text:'노란 연습 작업 지점까지 항해한 뒤 5 knot 이하로 감속하고 E 또는 화면의 작업 버튼을 눌러 보세요.'}
 ];
 
-function showTutorialCoach(){
-  if(!ui.tutorialCoach) return;
-  if(!tutorialMode){ui.tutorialCoach.style.display='none';return}
-  const step=TUTORIAL_STEPS[tutorialStep]||TUTORIAL_STEPS[0];
-  ui.tutorialCoach.style.display='block';
-  ui.tutorialStepBadge.textContent=`실전 튜토리얼 ${tutorialStep+1} / ${TUTORIAL_STEPS.length}`;
-  ui.tutorialCoachTitle.textContent=step.title;
-  ui.tutorialCoachText.textContent=step.text;
-  ui.tutorialCoachProgress.innerHTML=TUTORIAL_STEPS.map((_,i)=>`<span class="${i<tutorialStep?'done':i===tutorialStep?'active':''}"></span>`).join('');
-}
+function showTutorialCoach(){ if(ui.tutorialCoach)ui.tutorialCoach.style.display='none'; }
 function setTutorialStep(step){
   tutorialStep=clamp(step,0,TUTORIAL_STEPS.length-1);
   showTutorialCoach();
@@ -116,7 +107,7 @@ function setTutorialStep(step){
 
 function showPagedGuide(pages,index=0,onDone=()=>{},label='안내'){
   const i=clamp(index,0,pages.length-1),page=pages[i];
-  showModal(`<div class="tag">${label} ${i+1} / ${pages.length}</div><div class="stageIntroIcon">${page.icon||'📘'}</div><h2>${page.title}</h2><p>${page.text}</p><div class="actions"><button class="btn" id="guideNext">${i===pages.length-1?'튜토리얼 시작':'다음'}</button>${i>0?'<button class="btn alt" id="guidePrev">이전</button>':''}</div>`);
+  showModal(`<div class="tag">${label} ${i+1} / ${pages.length}</div><div class="stageIntroIcon">${page.icon||'📘'}</div><h2>${page.title}</h2><p>${page.text}</p><div class="actions"><button class="btn" id="guideNext">${i===pages.length-1?'튜토리얼 시작':'다음'}</button>${i>0?'<button class="btn alt" id="guidePrev">이전</button>':''}</div>`, 'compact');
   setTimeout(()=>{
     const next=$('guideNext'); if(next)next.onclick=()=>i===pages.length-1?onDone():showPagedGuide(pages,i+1,onDone,label);
     const prev=$('guidePrev'); if(prev)prev.onclick=()=>showPagedGuide(pages,i-1,onDone,label);
@@ -124,9 +115,9 @@ function showPagedGuide(pages,index=0,onDone=()=>{},label='안내'){
 }
 
 function startStoryExperience(){
-  if(typeof unlockGameAudio==='function') unlockGameAudio();
-  phase='intro';
-  showPagedGuide(STORY_PAGES,0,()=>beginInteractiveTutorial(true),'스토리');
+  if(typeof unlockGameAudio==='function')unlockGameAudio();
+  tutorialCompleted=true;saveStageProgress();
+  selectStage(0,false);
 }
 function showTutorial(startStageAfter=false){ beginInteractiveTutorial(startStageAfter); }
 
@@ -217,12 +208,7 @@ function updateTutorialShipProgress(){
 function finishInteractiveTutorial(){
   tutorialCompleted=true;saveStageProgress();tutorialMode=false;if(ui.tutorialCoach)ui.tutorialCoach.style.display='none';
   ship.speed=0;ship.throttle=0;phase='intro';if(ui.mouseControls)ui.mouseControls.style.display='none';if(typeof setGameAudioMode==='function')setGameAudioMode('office');
-  const primary=tutorialStoryStart?'STAGE 1 시작':(tutorialReturnWasMenu?'메인 메뉴로':'원래 스테이지로 돌아가기');
-  showModal(`<div class="tag">실전 튜토리얼 완료</div><div class="guideHero">🎓</div><h2>조작 연습 완료!</h2><p>직접 이동하고, 전화 신고를 받고, 준비물을 챙기고, 정비선을 운항해서 작업 지점까지 도착했습니다.</p><div class="manualCard"><b>이제 기억할 흐름</b><p>신고 확인 → 준비물 확보 → 출동 → 안전 운항 → 현장 작업 → 원리 확인</p></div><div class="actions"><button class="btn" id="tutorialFinishAction">${primary}</button><button class="btn alt" id="tutorialHelp">조작 / 도움말 보기</button></div>`);
-  setTimeout(()=>{
-    $('tutorialFinishAction').onclick=()=>{if(tutorialStoryStart)selectStage(0,true);else if(tutorialReturnWasMenu)showMainMenu();else selectStage(tutorialReturnStage,true)};
-    $('tutorialHelp').onclick=()=>showManual('tutorial-end');
-  },0);
+  if(tutorialStoryStart)selectStage(0,false);else if(tutorialReturnWasMenu)showMainMenu();else selectStage(tutorialReturnStage,false);
 }
 function showManual(source='auto'){
   const returnToGame=source==='game' || (source==='auto' && phase!=='intro');
@@ -236,7 +222,7 @@ function showManual(source='auto'){
       <div class="manualCard"><b>🛠️ 현장 미니게임</b><p>배터리 장착, 케이블 연결, 렌즈 정렬, GPS 위치 맞추기 등이 나옵니다. GPS는 키보드 방향키 또는 화면의 ▲▼◀▶ 버튼을 직접 클릭해 이동할 수 있습니다.</p></div>
       <div class="manualCard"><b>⌨️ 키보드</b><p>Enter/Space는 확인·다음, Q는 장비 무게표, Esc는 설정/일시정지입니다. 사무실에서는 E로 상호작용할 수 있습니다.</p></div>
       <div class="manualCard"><b>🖱️ 마우스</b><p>사무실은 목적지를 클릭해 이동하고, 항해는 화면 아래 버튼을 누른 채 조작합니다. 미니게임도 클릭·슬라이더·선택 방식으로 진행합니다.</p></div>
-    </div><div class="actions"><button class="btn" id="manualClose">게임으로 돌아가기</button><button class="btn alt" id="manualTutorial">실전 튜토리얼 다시 하기</button></div>`);
+    </div><div class="actions"><button class="btn" id="manualClose">게임으로 돌아가기</button><button class="btn alt" id="manualTutorial">실전 튜토리얼 다시 하기</button></div>`, 'sheet');
   setTimeout(()=>{
     $('manualClose').onclick=()=>returnToGame?hideModal():showMainMenu();
     $('manualTutorial').onclick=()=>beginInteractiveTutorial(false);
@@ -244,7 +230,7 @@ function showManual(source='auto'){
 }
 function showMainMenu(){
   phase='intro';
-  showModal(`<div class="tag">항로표지 안전학교 · STORY MODE</div><h1>바다의 빛을<br>지켜라!</h1><p>견습 점검원이 되어 7개의 스테이지를 차례로 해결하세요. 스테이지의 사건은 고정이지만 항해 상황과 가져온 장비 미니게임은 매번 달라집니다.</p><div class="actions"><button class="btn" id="menuContinue">${unlockedStageIndex>0?'계속하기':'스토리 시작'}</button><button class="btn alt" id="menuStages">스테이지 선택</button><button class="btn alt" id="menuManual">게임 설명서</button></div>`);
+  showModal(`<div class="tag">항로표지 안전학교 · STORY MODE</div><h1>바다의 빛을<br>지켜라!</h1><p>견습 점검원이 되어 7개의 스테이지를 차례로 해결하세요. 스테이지의 사건은 고정이지만 항해 상황과 가져온 장비 미니게임은 매번 달라집니다.</p><div class="actions"><button class="btn" id="menuContinue">${unlockedStageIndex>0?'계속하기':'스토리 시작'}</button><button class="btn alt" id="menuStages">스테이지 선택</button><button class="btn alt" id="menuManual">게임 설명서</button></div>`, 'menu');
   setTimeout(()=>{
     $('menuContinue').onclick=()=> tutorialCompleted ? selectStage(unlockedStageIndex,true) : startStoryExperience();
     $('menuStages').onclick=showStageSelect;
@@ -253,7 +239,7 @@ function showMainMenu(){
 }
 function showStageSelect(){
   const cards=STAGES.map((s,i)=>{const locked=i>unlockedStageIndex;return `<button class="stageCard ${locked?'locked':''}" data-stage="${i}" ${locked?'disabled':''}><span class="stageNo">STAGE ${s.number}</span><span class="stageIcon">${locked?'🔒':s.icon}</span><b>${s.title}</b><small>${s.subtitle}</small></button>`}).join('');
-  showModal(`<div class="tag">스테이지 선택</div><h2>항로표지 점검 기록</h2><p>완료한 스테이지는 다시 플레이할 수 있습니다.</p><div class="stageGrid">${cards}</div><div class="actions"><button class="btn alt" id="stageBack">돌아가기</button></div>`);
+  showModal(`<div class="tag">스테이지 선택</div><h2>항로표지 점검 기록</h2><p>완료한 스테이지는 다시 플레이할 수 있습니다.</p><div class="stageGrid">${cards}</div><div class="actions"><button class="btn alt" id="stageBack">돌아가기</button></div>`, 'sheet');
   setTimeout(()=>{
     ui.modal.querySelectorAll('.stageCard:not(.locked)').forEach(btn=>btn.onclick=()=>selectStage(Number(btn.dataset.stage),true));
     $('stageBack').onclick=showMainMenu;
@@ -263,13 +249,9 @@ function selectStage(index,showIntro=true){
   if(index>unlockedStageIndex) return;
   currentStageIndex=clamp(index,0,STAGES.length-1);
   loadMissionForStage(currentStageIndex);
-  if(showIntro) showStageIntro(); else startMission();
+  startMission();
 }
-function showStageIntro(){
-  const s=stageInfo();
-  showModal(`<div class="tag">STAGE ${s.number} / ${STAGES.length}</div><div class="stageIntroIcon">${s.icon}</div><h2>${s.title}</h2><p class="stageSubtitle">${s.subtitle}</p><p>${s.story}</p><div class="principleCard"><b>이번 스테이지에서 알아볼 것</b><br>${s.lesson}</div><div class="actions"><button class="btn" id="stageStart">스테이지 시작</button><button class="btn alt" id="stageSelectBack">스테이지 선택</button></div>`);
-  setTimeout(()=>{ $('stageStart').onclick=()=>startMission(); $('stageSelectBack').onclick=showStageSelect; },0);
-}
+function showStageIntro(){ startMission(); }
 function completeCurrentStage(){
   const justCompleted=currentStageIndex;
   if(justCompleted<STAGES.length-1) unlockedStageIndex=Math.max(unlockedStageIndex,justCompleted+1);

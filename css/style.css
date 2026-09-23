@@ -2066,3 +2066,391 @@ html,body{
   #mouseControls{grid-template-columns:repeat(4,minmax(0,1fr))!important}
   .hudTopFlex>#cameraPill,.hudTopFlex>#telemetry{font-size:8.5px!important}
 }
+
+/* =========================================================
+   v2.2.0 FULL ADAPTIVE UI / MOBILE OPTIMIZATION
+   - fixed aspect/size assumptions removed
+   - real viewport + measured HUD/control reserves
+   ========================================================= */
+:root{
+  --top-reserve:0px;
+  --bottom-info-reserve:0px;
+  --usable-h:var(--app-h);
+  --ui-scale:1;
+  --tap-min:44px;
+}
+html,body,#root{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;overscroll-behavior:none!important}
+body{touch-action:none!important;-webkit-text-size-adjust:100%!important}
+#root{contain:layout paint size!important}
+#game{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important}
+.ui{padding:calc(var(--safe-t) + var(--edge-gap)) calc(var(--safe-r) + var(--edge-gap)) calc(var(--safe-b) + var(--edge-gap)) calc(var(--safe-l) + var(--edge-gap))!important;gap:0!important;overflow:hidden!important}
+
+/* Top / bottom HUD occupy only their measured content. */
+.hudTopFlex,.hudBottomFlex{flex:0 0 auto!important;width:100%!important;min-width:0!important;max-width:100%!important}
+.hudTopFlex{gap:var(--panel-gap)!important;align-content:flex-start!important}
+.hudBottomFlex{gap:var(--panel-gap)!important;align-content:flex-end!important;padding-bottom:var(--controls-reserve)!important}
+
+/* Every primary panel can shrink instead of forcing viewport overflow. */
+#mission,#telemetry,#cameraPill,#inventory,#instruments,#navcard,#prepChecklist,#tutorialCoach{
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+#mission:not(.panelMinimized),#telemetry:not(.panelMinimized),#inventory:not(.panelMinimized),#instruments:not(.panelMinimized){
+  max-height:clamp(58px,22dvh,190px)!important;
+  overflow:auto!important;
+  scrollbar-width:thin;
+}
+#cameraPill{max-height:clamp(34px,10dvh,80px)!important;overflow:auto!important}
+
+/* Floating task/tutorial panels use the real free vertical area between HUDs. */
+#prepChecklist,#tutorialCoach{
+  top:calc(var(--safe-t) + var(--edge-gap) + var(--top-reserve) + var(--panel-gap))!important;
+  bottom:auto!important;
+  max-height:max(80px,calc(var(--app-h) - var(--top-reserve) - var(--bottom-info-reserve) - var(--controls-reserve) - var(--safe-t) - var(--safe-b) - 5*var(--edge-gap)))!important;
+  overflow:auto!important;
+  overscroll-behavior:contain!important;
+}
+#prepChecklist{left:calc(var(--safe-l) + var(--edge-gap))!important;width:min(320px,calc(100% - var(--safe-l) - var(--safe-r) - 2*var(--edge-gap)))!important}
+#tutorialCoach{left:50%!important;transform:translateX(-50%)!important;width:min(560px,calc(100% - var(--safe-l) - var(--safe-r) - 2*var(--edge-gap)))!important}
+
+/* Modal/message boxes are always contained by the actual viewport. */
+#modal{
+  left:calc(var(--safe-l) + var(--edge-gap))!important;
+  right:calc(var(--safe-r) + var(--edge-gap))!important;
+  top:calc(var(--safe-t) + var(--edge-gap))!important;
+  bottom:calc(var(--safe-b) + var(--edge-gap))!important;
+  transform:none!important;
+  width:auto!important;
+  height:auto!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:auto!important;
+  padding:clamp(9px,2.2vmin,28px)!important;
+  overflow:auto!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  align-self:center!important;
+  justify-self:center!important;
+}
+#modal h1{font-size:clamp(25px,7vmin,58px)!important;line-height:1.03!important}
+#modal h2{font-size:clamp(18px,4.2vmin,30px)!important}
+#modal h3{font-size:clamp(15px,3.2vmin,23px)!important}
+#modal p,#modal li{font-size:clamp(10px,2.2vmin,14px)!important;line-height:1.45!important}
+#modal .actions,.systemActions{display:flex!important;flex-wrap:wrap!important;align-items:stretch!important}
+#modal .btn,.systemActions .btn{min-height:var(--tap-min)!important;min-width:0!important;flex:1 1 150px!important}
+#modal [class*="Grid"]{min-width:0!important;max-width:100%!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,132px),1fr))!important}
+/* v2.2.1: system overlay is hidden by default. Responsive CSS must not force PAUSE on startup. */
+.systemOverlay{display:none!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
+.systemOverlay[aria-hidden="false"]{display:flex!important}
+.systemPanel{width:min(680px,100%)!important;max-height:100%!important;overflow:auto!important;margin:auto!important}
+
+/* Touch controls: never disappear below viewport and never get covered by bottom HUD. */
+#mouseControls{
+  position:absolute!important;
+  z-index:60!important;
+  left:calc(var(--safe-l) + var(--edge-gap))!important;
+  right:calc(var(--safe-r) + var(--edge-gap))!important;
+  bottom:calc(var(--safe-b) + var(--edge-gap))!important;
+  width:auto!important;
+  max-width:none!important;
+  min-width:0!important;
+  max-height:min(34dvh,220px)!important;
+  overflow:visible!important;
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  gap:clamp(3px,.8vmin,8px)!important;
+  padding:clamp(4px,.9vmin,8px)!important;
+}
+.mouseCtrl{min-width:0!important;min-height:clamp(42px,7.5vmin,56px)!important;font-size:clamp(9px,2.4vmin,13px)!important;padding:5px 3px!important;touch-action:none!important;-webkit-user-select:none!important;user-select:none!important}
+#touch{display:none!important}
+
+/* Floating messages stay above controls and wrap instead of clipping. */
+#progress{bottom:calc(var(--safe-b) + var(--controls-reserve) + 6px)!important;width:min(560px,68%)!important;max-width:calc(100% - 2*var(--edge-gap))!important}
+#dockPrompt{bottom:calc(var(--safe-b) + var(--controls-reserve) + 28px)!important;max-width:calc(100% - var(--safe-l) - var(--safe-r) - 2*var(--edge-gap))!important;white-space:normal!important;text-align:center!important}
+#toast{bottom:calc(var(--safe-b) + var(--controls-reserve) + 70px)!important;max-width:calc(100% - var(--safe-l) - var(--safe-r) - 2*var(--edge-gap))!important;white-space:normal!important;text-align:center!important}
+.hazardBanner,.weatherBanner{max-width:calc(100% - var(--safe-l) - var(--safe-r) - 2*var(--edge-gap))!important;white-space:normal!important;text-align:center!important}
+
+/* Portrait: prioritize game visibility; cards wrap into compact rows. */
+#root[data-orientation="portrait"] .hudTopFlex{flex-wrap:wrap!important}
+#root[data-orientation="portrait"] .hudTopFlex>#mission{flex:1 1 100%!important}
+#root[data-orientation="portrait"] .hudTopFlex>#cameraPill{flex:1 1 44%!important;max-width:none!important}
+#root[data-orientation="portrait"] .hudTopFlex>#telemetry{flex:1 1 52%!important;max-width:none!important}
+#root[data-orientation="portrait"] .hudBottomFlex{flex-wrap:wrap!important}
+#root[data-orientation="portrait"] .hudBottomFlex>#inventory{flex:1 1 100%!important}
+#root[data-orientation="portrait"] .hudBottomFlex>#instruments{flex:1 1 60%!important;max-width:none!important}
+#root[data-orientation="portrait"] .hudBottomFlex>#navcard{flex:1 1 34%!important;max-width:180px!important;min-width:96px!important;width:auto!important}
+#root[data-orientation="portrait"] #mouseControls{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+
+/* Landscape: keep controls shallow and allow HUD to wrap when necessary instead of clipping. */
+#root[data-orientation="landscape"] .hudTopFlex,#root[data-orientation="landscape"] .hudBottomFlex{flex-wrap:wrap!important}
+#root[data-orientation="landscape"] .hudTopFlex>#mission{flex:2 1 44%!important}
+#root[data-orientation="landscape"] .hudTopFlex>#cameraPill{flex:1 1 18%!important;max-width:300px!important}
+#root[data-orientation="landscape"] .hudTopFlex>#telemetry{flex:1 1 22%!important;max-width:320px!important}
+#root[data-orientation="landscape"] #mouseControls{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+
+/* Compact phones / short landscape phones. */
+#root[data-density="tiny"]{--edge-gap:3px;--panel-gap:3px;--panel-pad:5px;--tap-min:40px}
+#root[data-density="tiny"] .glass{border-width:2px!important;border-radius:12px!important;box-shadow:0 5px 0 rgba(8,18,43,.18)!important}
+#root[data-density="tiny"] #mission,#root[data-density="tiny"] #telemetry,#root[data-density="tiny"] #inventory,#root[data-density="tiny"] #instruments{padding:5px 7px!important}
+#root[data-density="tiny"] .missionTitle{font-size:clamp(12px,3.8vmin,16px)!important;margin:2px 0!important}
+#root[data-density="tiny"] .missionText,#root[data-density="tiny"] .teleSub{font-size:clamp(8px,2.2vmin,10px)!important;line-height:1.2!important}
+#root[data-density="tiny"] .teleMain{font-size:clamp(14px,4vmin,20px)!important}
+#root[data-density="tiny"] #cameraPill{font-size:8px!important;padding:5px 7px!important}
+#root[data-density="tiny"] #navcard{max-height:100px!important}
+#root[data-density="tiny"] .mouseCtrl{min-height:38px!important;font-size:8px!important}
+#root[data-density="tiny"] #modal{padding:7px!important;border-radius:16px!important}
+#root[data-density="tiny"] #modal h1{font-size:clamp(21px,8vmin,32px)!important;margin:4px 0!important}
+#root[data-density="tiny"] #modal p,#root[data-density="tiny"] #modal li{font-size:9px!important;line-height:1.25!important}
+
+@media(max-width:520px){
+  #modal .actions,.systemActions{flex-direction:column!important}
+  #modal .actions .btn,.systemActions .btn{width:100%!important;flex:0 0 auto!important}
+  .guideBtn,.pauseBtn{padding:5px 7px!important;font-size:8px!important;min-width:auto!important}
+}
+@media(max-height:430px){
+  #root[data-orientation="landscape"] #mission:not(.panelMinimized),
+  #root[data-orientation="landscape"] #telemetry:not(.panelMinimized),
+  #root[data-orientation="landscape"] #inventory:not(.panelMinimized),
+  #root[data-orientation="landscape"] #instruments:not(.panelMinimized){max-height:58px!important}
+  #root[data-orientation="landscape"] .missionText,#root[data-orientation="landscape"] .teleSub{display:none!important}
+  #root[data-orientation="landscape"] #navcard{max-height:74px!important}
+  #root[data-orientation="landscape"] .mouseCtrl{min-height:34px!important}
+}
+
+
+/* =========================================================
+   v2.2.2 POLISHED GAME UI
+   Event briefing stays compact; dialogs no longer fill screen.
+   ========================================================= */
+#modal{
+  display:none;
+  flex-direction:column!important;
+  left:50%!important;
+  right:auto!important;
+  top:50%!important;
+  bottom:auto!important;
+  transform:translate(-50%,-50%)!important;
+  width:min(620px,calc(var(--app-w) - var(--safe-l) - var(--safe-r) - 2*var(--edge-gap) - 12px))!important;
+  height:auto!important;
+  max-width:calc(100% - var(--safe-l) - var(--safe-r) - 2*var(--edge-gap))!important;
+  max-height:min(78dvh,calc(var(--app-h) - var(--safe-t) - var(--safe-b) - 2*var(--edge-gap) - 12px))!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border-radius:clamp(18px,3vmin,28px)!important;
+  background:linear-gradient(180deg,rgba(40,73,143,.98),rgba(25,49,101,.98))!important;
+  border:2px solid rgba(255,255,255,.24)!important;
+  box-shadow:0 14px 0 rgba(8,18,43,.22),0 26px 68px rgba(0,0,0,.36)!important;
+}
+#modal .modalChrome{
+  flex:0 0 auto;
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:6px 8px 6px 14px;
+  background:rgba(8,25,61,.28);
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+#modal .modalChromeTitle{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#d9ecff;
+  font-size:clamp(9px,1.6vmin,12px);
+  font-weight:900;
+  letter-spacing:.04em;
+}
+#modal .modalMinBtn{
+  flex:0 0 auto;
+  width:34px;
+  height:30px;
+  min-height:30px;
+  padding:0!important;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;
+  background:rgba(255,255,255,.09);
+  color:#fff;
+  font-size:18px;
+  font-weight:1000;
+  line-height:1;
+  touch-action:manipulation;
+}
+#modal .modalContent{
+  min-width:0;
+  max-width:100%;
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:clamp(12px,2.4vmin,24px);
+}
+#modal.modalMinimized{
+  width:min(310px,calc(100% - 2*var(--edge-gap)))!important;
+  max-height:none!important;
+  left:auto!important;
+  right:calc(var(--safe-r) + var(--edge-gap))!important;
+  top:calc(var(--safe-t) + var(--edge-gap))!important;
+  transform:none!important;
+  box-shadow:0 7px 0 rgba(8,18,43,.2),0 14px 38px rgba(0,0,0,.28)!important;
+}
+#modal.modalMinimized .modalContent{display:none!important}
+#modal.modalMinimized .modalChrome{border-bottom:0}
+
+/* Start/menu and narrative pages stay readable but leave surrounding game art visible. */
+#modal.modal-menu{width:min(600px,90%)!important;max-height:min(74dvh,680px)!important}
+#modal.modal-compact{width:min(540px,90%)!important;max-height:min(66dvh,560px)!important}
+#modal.modal-dialog{width:min(650px,92%)!important;max-height:min(76dvh,680px)!important}
+#modal.modal-sheet{width:min(900px,94%)!important;max-height:min(82dvh,760px)!important}
+#modal.modal-task{width:min(940px,95%)!important;max-height:min(84dvh,790px)!important}
+
+/* Incident/event briefing: game-like side card instead of a full-screen blocker. */
+#modal.modal-briefing{
+  width:min(455px,calc(100% - var(--safe-l) - var(--safe-r) - 2*var(--edge-gap) - 8px))!important;
+  max-height:min(62dvh,560px)!important;
+  left:auto!important;
+  right:calc(var(--safe-r) + var(--edge-gap))!important;
+  top:calc(var(--safe-t) + var(--edge-gap) + min(var(--top-reserve),86px))!important;
+  bottom:auto!important;
+  transform:none!important;
+  background:linear-gradient(165deg,rgba(24,50,105,.97),rgba(16,36,79,.97))!important;
+  border-color:rgba(116,220,255,.34)!important;
+}
+#modal.modal-briefing .modalContent{padding:clamp(11px,2vmin,18px)!important}
+.incidentBrief{display:flex;flex-direction:column;gap:10px;min-width:0}
+.incidentHeader{display:flex;align-items:center;gap:12px;min-width:0}
+.incidentHeader>div:last-child{min-width:0;flex:1}
+.incidentIcon{
+  flex:0 0 auto;width:52px;height:52px;border-radius:16px;
+  display:grid;place-items:center;font-size:28px;
+  background:linear-gradient(145deg,#6acff3,#4b84da);
+  border:2px solid rgba(255,255,255,.28);
+  box-shadow:0 6px 0 rgba(10,27,62,.28);
+}
+.incidentHeader h2{font-size:clamp(18px,3.1vmin,25px)!important;line-height:1.12!important;margin:5px 0 2px!important}
+.incidentStatus{font-size:11px;font-weight:950;color:#ffd975}
+.incidentStory{font-size:clamp(10px,1.7vmin,12px)!important;line-height:1.42!important;color:#dcecff!important;margin:0!important}
+.incidentMessage{
+  padding:10px 12px;border-radius:14px;background:rgba(6,22,55,.36);
+  border:1px solid rgba(121,213,255,.22)
+}
+.incidentMessage>span{display:block;font-size:9px;font-weight:1000;letter-spacing:.12em;color:#8fddff;margin-bottom:4px}
+.incidentMessage p{margin:0!important;font-size:clamp(11px,1.85vmin,13px)!important;line-height:1.45!important}
+.incidentEquipment{padding:9px 11px;border-radius:13px;background:rgba(255,255,255,.07);font-size:11px;line-height:1.55;color:#edf7ff}
+.incidentEquipment b{display:block;color:#fff7a8;margin-bottom:3px}
+.incidentMeta{display:flex;flex-wrap:wrap;gap:6px}
+.incidentMeta span{padding:5px 8px;border-radius:999px;background:rgba(110,224,198,.11);border:1px solid rgba(110,224,198,.22);font-size:9px;font-weight:850;color:#b9f8e9}
+#modal.modal-briefing .actions{margin-top:2px!important;gap:7px!important}
+#modal.modal-briefing .actions .btn{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
+
+/* Keep repair tasks substantial but never taller than the actual display. */
+#modal.modal-task .modalContent{padding:clamp(10px,1.8vmin,20px)!important}
+#modal.modal-task .repairWrap{max-width:100%;min-width:0}
+
+@media(max-width:760px){
+  #modal{
+    width:calc(100% - var(--safe-l) - var(--safe-r) - 12px)!important;
+    max-height:calc(var(--app-h) - var(--safe-t) - var(--safe-b) - 12px)!important;
+  }
+  #modal.modal-menu,#modal.modal-compact,#modal.modal-dialog{width:calc(100% - var(--safe-l) - var(--safe-r) - 14px)!important;max-height:min(72dvh,620px)!important}
+  #modal.modal-sheet,#modal.modal-task{width:calc(100% - var(--safe-l) - var(--safe-r) - 8px)!important;max-height:calc(var(--app-h) - var(--safe-t) - var(--safe-b) - 8px)!important}
+  #modal.modal-briefing{
+    left:calc(var(--safe-l) + 7px)!important;
+    right:calc(var(--safe-r) + 7px)!important;
+    top:auto!important;
+    bottom:calc(var(--safe-b) + var(--controls-reserve) + 8px)!important;
+    width:auto!important;
+    max-height:min(52dvh,460px)!important;
+  }
+  .incidentIcon{width:44px;height:44px;font-size:24px;border-radius:13px}
+  .incidentBrief{gap:7px}
+  .incidentStory{display:none}
+  .incidentEquipment{font-size:10px;line-height:1.4}
+}
+
+@media(orientation:landscape) and (max-height:560px){
+  #modal.modal-briefing{
+    width:min(410px,48vw)!important;
+    left:auto!important;
+    right:calc(var(--safe-r) + 5px)!important;
+    top:calc(var(--safe-t) + 5px)!important;
+    bottom:auto!important;
+    max-height:calc(var(--app-h) - var(--safe-t) - var(--safe-b) - 10px)!important;
+  }
+  #modal.modal-briefing .modalChrome{min-height:30px;padding:3px 6px 3px 10px}
+  #modal.modal-briefing .modalContent{padding:7px 9px!important}
+  #modal.modal-briefing .incidentIcon{width:38px;height:38px;font-size:21px}
+  #modal.modal-briefing .incidentHeader h2{font-size:17px!important}
+  #modal.modal-briefing .incidentMessage{padding:7px 9px}
+  #modal.modal-briefing .incidentEquipment{padding:6px 8px;font-size:9px}
+  #modal.modal-briefing .incidentMeta{display:none}
+  #modal.modal-briefing .actions .btn{min-height:34px!important;padding:5px 8px!important}
+}
+
+/* v2.2.2 final layering + short-screen corrections after browser verification */
+#modal{z-index:82!important}
+#modal.modal-briefing{z-index:82!important}
+#root[data-low-height="true"] #modal.modal-briefing{
+  width:min(410px,48vw)!important;
+  max-width:48vw!important;
+  left:auto!important;
+  right:calc(var(--safe-r) + 5px)!important;
+  top:calc(var(--safe-t) + 5px)!important;
+  bottom:auto!important;
+  transform:none!important;
+  max-height:calc(var(--app-h) - var(--safe-t) - var(--safe-b) - 10px)!important;
+  padding:0!important;
+}
+@media(max-width:760px) and (orientation:portrait){
+  #modal.modal-briefing{
+    max-height:min(43dvh,370px)!important;
+  }
+  #modal.modal-briefing .incidentMeta{display:none!important}
+  #modal.modal-briefing .incidentEquipment>div{max-height:44px;overflow:auto;overscroll-behavior:contain}
+  #modal.modal-briefing .modalContent{padding:9px 11px!important}
+  #modal.modal-briefing .incidentMessage{padding:8px 10px}
+}
+@media(orientation:landscape) and (max-height:560px){
+  #root[data-low-height="true"] #modal.modal-briefing{
+    width:min(410px,48vw)!important;
+    max-width:48vw!important;
+  }
+  #modal.modal-briefing .incidentStory{display:none!important}
+  #modal.modal-briefing .incidentEquipment>div{max-height:38px;overflow:auto}
+}
+
+/* Short landscape: keep repair playfield visible without feeling like a document. */
+@media(orientation:landscape) and (max-height:560px){
+  #modal.modal-task{width:min(94vw,930px)!important;max-height:calc(var(--app-h) - var(--safe-t) - var(--safe-b) - 8px)!important}
+  #modal.modal-task .modalChrome{min-height:30px;padding:3px 6px 3px 10px}
+  #modal.modal-task .modalContent{padding:6px 10px 8px!important}
+  #modal.modal-task h2{font-size:18px!important;margin:3px 0 5px!important}
+  #modal.modal-task .repairWrap{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)!important;gap:8px!important;margin-top:5px!important}
+  #modal.modal-task .repairScene{min-height:188px!important;padding:8px!important;border-radius:16px!important}
+  #modal.modal-task .repairSide{padding:8px!important;border-radius:15px!important}
+  #modal.modal-task .repairQuestion{font-size:14px!important;line-height:1.2!important;margin:4px 0 6px!important}
+  #modal.modal-task .selectedEquipmentStrip{font-size:8.5px!important;padding:5px 7px!important;margin:4px 0!important}
+  #modal.modal-task .repairStep{font-size:10px!important}
+  #modal.modal-task .repairProgress{margin:4px 0!important}
+  #modal.modal-task .equipmentHero{padding:10px 14px!important;border-width:3px!important}
+  #modal.modal-task .equipmentHero span{font-size:44px!important}
+  #modal.modal-task .equipmentHero b{font-size:10px!important}
+  #modal.modal-task .repairSceneTitle{left:10px!important;top:9px!important;font-size:11px!important}
+  #modal.modal-task .batteryGame{min-height:154px!important;padding:7px!important;border-radius:13px!important}
+  #modal.modal-task .batterySlot{height:46px!important;border-radius:11px!important;font-size:11px!important}
+  #modal.modal-task .batteryPackMini{width:150px!important;margin:6px auto!important;padding:7px!important;border-radius:12px!important;box-shadow:0 4px 0 rgba(122,83,8,.3)!important}
+  #modal.modal-task .terminalRow button,#modal.modal-task .cableSide button,#modal.modal-task .boltMini,#modal.modal-task .bigSwitch,#modal.modal-task .lampMini,#modal.modal-task .latchMini,#modal.modal-task .safetySteps button,#modal.modal-task .bpChoices button,#modal.modal-task .chainLinkMini{min-height:32px!important}
+  #modal.modal-task .gameStatus{margin-top:5px!important;padding:5px 7px!important;font-size:9px!important;line-height:1.25!important}
+  #modal.modal-task .lensAlign{height:120px!important}
+  #modal.modal-task .latchBoxMini{height:125px!important;width:210px!important}
+  #modal.modal-task .ropeGame{height:82px!important}
+  #modal.modal-task .workerMini{font-size:50px!important}
+}
+
+
+/* v2.2.3 CLEAN PLAY — unsolicited text messages are disabled. */
+#toast,#dockPrompt,#hazardBanner,#weatherBanner,#tutorialCoach{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#mission .eyebrow,#mission .stageLabel,#mission .missionTitle,#mission .missionText,#cameraPill{display:none!important}
+#mission{width:auto!important;min-width:0!important;max-width:none!important;padding:5px 6px!important;display:flex!important;align-items:center!important;gap:6px!important;background:rgba(7,18,29,.50)!important}
+#mission .tinyBtn{position:static!important;margin:0!important;min-height:38px!important}

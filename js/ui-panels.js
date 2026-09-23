@@ -45,23 +45,31 @@ function attachPanel(id, title){
   btn.addEventListener('click',e=>{
     e.preventDefault();
     e.stopPropagation();
+    panel.dataset.userPanelChoice='1';
     setMinimized(panel,!panel.classList.contains('panelMinimized'));
   });
   panel.appendChild(btn);
 }
 
-function applyMobileDefaults(){
-  if(!matchMedia('(max-width: 760px)').matches) return;
-  // 게임 화면을 최대한 비우기 위해 보조 정보 패널은 기본 접기.
-  ['prepChecklist','telemetry','inventory','instruments','navcard'].forEach(id=>{
+function applyAdaptiveDefaults(){
+  const w=(window.visualViewport&&window.visualViewport.width)||innerWidth;
+  const h=(window.visualViewport&&window.visualViewport.height)||innerHeight;
+  const tiny=w<520 || h<430;
+  const mobile=w<760;
+  const targets=tiny?['prepChecklist','telemetry','inventory','instruments','navcard']:mobile?['prepChecklist','inventory','instruments','navcard']:[];
+  targets.forEach(id=>{
     const panel=document.getElementById(id);
-    if(panel) setMinimized(panel,true);
+    if(panel && panel.dataset.userPanelChoice!=='1') setMinimized(panel,true);
   });
 }
+function scheduleAdaptiveDefaults(){requestAnimationFrame(applyAdaptiveDefaults);}
 
 function install(){
   PANEL_CONFIG.forEach(([id,title])=>attachPanel(id,title));
-  applyMobileDefaults();
+  applyAdaptiveDefaults();
+  window.addEventListener('resize',scheduleAdaptiveDefaults,{passive:true});
+  window.addEventListener('orientationchange',scheduleAdaptiveDefaults,{passive:true});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize',scheduleAdaptiveDefaults,{passive:true});
 }
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true});

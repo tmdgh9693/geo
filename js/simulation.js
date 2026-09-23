@@ -30,7 +30,7 @@ function emitWake() { const fx = Math.cos(ship.heading), fy = Math.sin(ship.head
 function splash(x, y, n = 24) { for (let i = 0; i < n; i++) { const a = Math.random() * TAU, s = 60 + Math.random() * 160; ship.particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: .65 + Math.random() * .65, size: 5 + Math.random() * 10 }) } }
 function updateShip(dt, now) {
     activeWeather=typeof weatherAt==='function'?weatherAt(ship.x,ship.y):null;
-    if(ui.weather){ui.weather.style.display=activeWeather?'block':'none';if(activeWeather)ui.weather.textContent=activeWeather.label;}
+    if(ui.weather)ui.weather.style.display='none';
     if(activeWeather&&!activeWeather.entered){activeWeather.entered=true;showToast(activeWeather.type==='fog'?'안개 구간 진입 · 속도를 줄이고 표지를 확인하세요.':activeWeather.type==='highwave'?'높은 파도 구간 · 조타가 흔들릴 수 있습니다.':'강풍·태풍 영향 구간 · 감속하고 방향을 유지하세요.');}
     const forwardHeld=!!(keys.w||keys.arrowup), reverseHeld=!!(keys.s||keys.arrowdown);
     // 전진 / 제동 / 후진을 분리해 작은 입력도 확실하게 반응하도록 합니다.
@@ -92,7 +92,7 @@ function updateShip(dt, now) {
     }
     let activeWarn=null,bestWarn=1e9;
     for(const m of dangerMarks){const dm=dist(ship.x,ship.y,m.x,m.y),dr=dist(ship.x,ship.y,m.rockX,m.rockY);if(dm<1150&&dr<1700&&dr<bestWarn){activeWarn=m;bestWarn=dr}if(dm<900&&!m.warned){m.warned=true;showToast(`주의! 약 ${Math.max(100,Math.round(dr/100)*100)}m 전방에 암초가 있습니다. 감속 후 우회하세요.`)}}
-    ui.hazard.style.display=activeWarn?'block':'none';if(activeWarn)ui.hazard.textContent=`⚠ 암초 ${Math.max(100,Math.round(bestWarn/100)*100)}m 전방 · 감속 후 우회`;
+    ui.hazard.style.display='none';
     if(Math.abs(ship.speed)>16&&Math.random()<dt*(10+30*sr))emitWake();
     for(const w of ship.wake){w.x+=w.vx*dt;w.y+=w.vy*dt;w.life-=dt*.28;w.size+=dt*8}ship.wake=ship.wake.filter(w=>w.life>0).slice(-500);
     for(const p of ship.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=Math.pow(.22,dt);p.vy*=Math.pow(.22,dt);p.life-=dt}ship.particles=ship.particles.filter(p=>p.life>0).slice(-300);
@@ -121,7 +121,7 @@ function updateShip(dt, now) {
     const midNear=!!(midRouteBeacon&&midRouteBeacon.status==='pending'&&dist(ship.x,ship.y,midRouteBeacon.x,midRouteBeacon.y)<midRouteBeacon.arrivalRadius);
     const goalNear=dist(ship.x,ship.y,goal.x,goal.y)<ARRIVAL_RADIUS;
     if(phase==='return'){
-      ui.dock.style.display=goalNear?'block':'none';
+      ui.dock.style.display='none';
       if(goalNear)ui.dock.textContent=`사무실 귀항 구간 · ${WORK_SPEED_KNOTS} knot 이하로 진입하면 복귀 완료`;
       ui.hudLabel.textContent='RETURN TO BASE';
       ui.hudSub.textContent=`사무실 귀항 부두까지 ${km}km · 앞으로 직진해 복귀하세요.`;

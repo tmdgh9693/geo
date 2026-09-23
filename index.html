@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>출동! 항로표지 긴급출동 v2.1.5 Dynamic Viewport Flex</title>
+    <title>출동! 항로표지 긴급출동 v2.2.3 Clean Play UI</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
 
@@ -18,7 +18,7 @@
                     <button class="tinyBtn guideBtn" id="guideBtn">도움말</button>
                     <button class="tinyBtn pauseBtn" id="pauseBtn" aria-label="설정 및 일시정지">⚙ 설정</button>
                     <div class="missionTitle" id="phaseTitle">항로표지 긴급출동</div>
-                    <div class="missionText" id="missionText">사무실의 전화를 받아 오늘의 임무를 확인하세요.</div>
+                    <div class="missionText" id="missionText"></div>
                 </div>
                 <div id="cameraPill" class="glass">기본 시점 · 탑뷰(진행방향) · C · 장난감 항구 스타일</div>
                 <div id="telemetry" class="glass">
@@ -31,8 +31,8 @@
                 <div class="prepHead"><b>이번 임무 필수 준비물</b><span class="prepLoad" id="prepLoad">0 / 0kg</span></div>
                 <div class="prepItems" id="prepItems"></div>
             </div>
-            <div id="hazardBanner" class="hazardBanner">⚠ 전방 암초 주의</div>
-            <div id="weatherBanner" class="weatherBanner">🌊 높은 파도 구간</div>
+            <div id="hazardBanner" class="hazardBanner"></div>
+            <div id="weatherBanner" class="weatherBanner"></div>
             <div id="hudBottomInfo" class="hudBottomFlex">
             <div id="inventory" class="glass">
                 <div class="invHead"><b>출동 장비</b>
@@ -63,7 +63,7 @@
             <div id="progress">
                 <div id="progressBar"></div>
             </div>
-            <div id="dockPrompt" class="glass">도착 구간 · 5 knot 이하에서 E로 작업 시작</div>
+            <div id="dockPrompt" class="glass"></div>
             <div id="controls" class="glass">키보드 조작 가능</div>
             <div id="mouseControls" class="glass" aria-label="마우스 항해 조작">
                 <button class="mouseCtrl steer" data-hold="a">◀ 좌회전</button>

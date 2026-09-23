@@ -17,7 +17,7 @@ function startRepairMiniGame(context='main'){
   ship.speed=0;ship.throttle=0;ui.controls.style.display='none';if(ui.mouseControls)ui.mouseControls.style.display='none';ui.hazard.style.display='none';if(ui.weather)ui.weather.style.display='none';ui.dock.style.display='none';
   repairSelection=pickEquipmentMiniGames(inventory,3);
   if(repairSelection.length<3){
-    showModal(`<div class="tag">현장 작업 준비 부족</div><h2>사용할 장비가 부족해요</h2><p>실제로 챙겨온 수리 장비 가운데 3개를 사용합니다. 수리 가능한 장비를 3개 이상 준비해 주세요.</p><div class="actions"><button class="btn" id="returnOffice">현재 스테이지 다시 시작</button></div>`);
+    showModal(`<div class="tag">현장 작업 준비 부족</div><h2>사용할 장비가 부족해요</h2><p>실제로 챙겨온 수리 장비 가운데 3개를 사용합니다. 수리 가능한 장비를 3개 이상 준비해 주세요.</p><div class="actions"><button class="btn" id="returnOffice">현재 스테이지 다시 시작</button></div>`, 'compact');
     setTimeout(()=>{const b=$('returnOffice');if(b)b.onclick=()=>selectStage(currentStageIndex,true)},0);return;
   }
   repairState={step:0};renderRepairStep();
@@ -30,13 +30,13 @@ function stepDots(step){return `<div class="repairProgress">${[0,1,2].map(i=>`<s
 function renderRepairStep(){
   clearRepairTimer();const item=repairSelection[repairState.step];if(!item){showOperationalVerification();return}
   const cfg=equipmentGameFor(item.name),pickedNames=repairSelection.map(x=>x.name).join(' · ');
-  showModal(`<div class="tag">현장 작업 · 준비물 연동</div><h2>${cfg.title}</h2><div class="repairWrap">${repairVisual(item,false)}<div class="repairSide"><div class="repairStep">장비 ${repairState.step+1} / 3</div>${stepDots(repairState.step)}<div class="selectedEquipmentStrip">이번 현장 미니게임: ${pickedNames}</div><div class="repairQuestion">직접 챙겨온 <b>${item.name}</b>을 사용해 점검해보세요.</div>${equipmentMiniGameBody(item)}</div></div>`);
+  showModal(`<div class="tag">현장 작업 · 준비물 연동</div><h2>${cfg.title}</h2><div class="repairWrap">${repairVisual(item,false)}<div class="repairSide"><div class="repairStep">장비 ${repairState.step+1} / 3</div>${stepDots(repairState.step)}<div class="selectedEquipmentStrip">이번 현장 미니게임: ${pickedNames}</div><div class="repairQuestion">직접 챙겨온 <b>${item.name}</b>을 사용해 점검해보세요.</div>${equipmentMiniGameBody(item)}</div></div>`, 'task');
   bindEquipmentMiniGame(item,principle=>completeRepairStep(item,principle));
 }
 function completeRepairStep(item,principle){
-  clearRepairTimer();if(typeof playRepairSuccessSound==='function')playRepairSuccessSound();const last=repairState.step===2;
-  showModal(`<div class="tag">원리 배우기</div><h2>${item.name} 사용 성공!</h2><div class="repairWrap">${repairVisual(item,true)}<div class="repairSide"><div class="successBurst">${last?'✨🔧✨':'✅'}</div><div class="principleCard"><b>이 장비는 왜 필요할까요?</b><br>${principle}</div><div class="eduNote">※ 실제 항로표지 정비·설치는 관련 기준과 안전절차에 따라 전문 인력이 수행합니다.</div><div class="actions"><button class="btn" id="repairNext">${last?'작업 마치기':'다음 준비물 사용'}</button></div></div></div>`);
-  $('repairNext').onclick=()=>{if(last)finishRepairAndResume();else{repairState.step++;renderRepairStep();}};
+  clearRepairTimer();if(typeof playRepairSuccessSound==='function')playRepairSuccessSound();
+  const last=repairState.step===2;
+  if(last)finishRepairAndResume();else{repairState.step++;renderRepairStep();}
 }
 function finishRepairAndResume(){
   clearRepairTimer();hideModal();
@@ -69,10 +69,8 @@ function showPostRepairReturnBrief(){
   ship.speed=0;ship.throttle=0;ship.rudder=0;ship.yawRate=0;
   phase='sail';
   if(typeof setGameAudioMode==='function')setGameAudioMode('sail');
-  ui.nav.style.display='block';ui.inst.style.display='block';ui.progress.style.display='block';ui.camera.style.display='block';if(ui.mouseControls)ui.mouseControls.style.display='grid';
-  const label=currentMission?.id==='lighthouse'?'거문도등대 점검 완료':'현장 수리 완료';
-  showModal(`<div class="tag">${label}</div><h2>정비선으로 돌아왔습니다</h2><p>수리한 항로표지는 이제 정상적으로 점멸합니다. 현재 진행 방향 그대로 약 <b>2,000m</b> 직진하면 파란색 <b>사무실 복귀 라인</b>이 나타납니다.</p><p>복귀 라인을 통과하면 자동으로 사무실로 돌아갑니다.</p><div class="actions"><button class="btn" id="departReturnLine">출발하기</button></div>`);
-  setTimeout(()=>{const b=$('departReturnLine');if(b)b.onclick=()=>{hideModal();startPostRepairExitLine();}},0);
+  ui.nav.style.display='block';ui.inst.style.display='block';ui.progress.style.display='block';ui.camera.style.display='none';if(ui.mouseControls)ui.mouseControls.style.display='grid';
+  startPostRepairExitLine();
 }
 
 function startPostRepairExitLine(){
@@ -171,9 +169,8 @@ function finishVerifiedRepair(){
 }
 function finishStageClear(){
   clearRepairTimer();returnToOfficeActive=false;returnFinishPending=false;phase='done';if(typeof setGameAudioMode==='function')setGameAudioMode('done');ship.speed=0;ship.throttle=0;if(ui.mouseControls)ui.mouseControls.style.display='none';completeCurrentStage();
-  const s=stageInfo(),used=repairSelection.map(x=>`${x.icon||''} ${x.name}`).join(' · '),finalStage=currentStageIndex===STAGES.length-1;
-  showModal(`<div class="tag">STAGE ${s.number} CLEAR</div><div class="stageClearIcon">${finalStage?'🏆':'⭐'}</div><h2>${s.title} 완료!</h2><p>이번 현장에서 사용한 준비물: <b>${used}</b></p><div class="principleCard"><b>이번 스테이지에서 배운 점</b><br>${s.lesson}</div>${finalStage?'<div class="finalStory"><b>🎉 항로표지 안전학교 수료!</b><br>중간 등표부터 거문도등대까지 점검을 마쳤습니다. 수리 후 정상 작동 확인까지 해야 임무가 완성됩니다.</div>':''}<div class="actions">${!finalStage?'<button class="btn" id="nextStage">다음 스테이지</button>':'<button class="btn" id="nextStage">스테이지 선택</button>'}<button class="btn alt" id="replayStage">이 스테이지 다시</button><button class="btn alt" id="stageMap">스테이지 선택</button></div>`);
-  setTimeout(()=>{$('nextStage').onclick=()=>finalStage?showStageSelect():selectStage(currentStageIndex+1,true);$('replayStage').onclick=()=>selectStage(currentStageIndex,true);$('stageMap').onclick=showStageSelect},0);
+  hideModal();
+  setTimeout(()=>showStageSelect(),220);
 }
 function finish(){finishRepairAndResume()}
 
@@ -182,10 +179,8 @@ function interact(){
   if(phase==='shore'){if(typeof shoreInteract==='function')shoreInteract();return}
   if(phase==='office'){
     if(dist(player.x,player.y,365,295)<95){
-      if(typeof stopPhoneRing==='function')stopPhoneRing();ensureMission();phase='brief';const req=currentMission.required.map(name=>{const item=items.find(x=>x.name===name);return `${item?.icon||'•'} ${name} ${item?.kg||'?'}kg`}).join(' · '),s=stageInfo();
-      showModal(`<div class="tag">STAGE ${s.number} · ${currentMission.type}</div><h2>${currentMission.title}</h2><p>${s.story}</p><p>${currentMission.brief}</p><p><b>필수 준비물:</b><br>${req}</p><p>적재 한도 ${currentMission.maxLoad}kg · 현장에서는 실제로 챙긴 수리 장비 중 3개가 무작위 미니게임으로 선택됩니다.</p><div class="actions"><button class="btn" id="prep">60초 출동 준비</button><button class="btn alt" id="briefWeight">장비 무게표</button></div>`);
-      setTimeout(()=>{$('prep').onclick=startGather;$('briefWeight').onclick=showWeightTable},0);
-    }else showToast('업무구역의 전화기로 이동하세요.');
+      if(typeof stopPhoneRing==='function')stopPhoneRing();ensureMission();startGather();
+    }
   }else if(phase==='gather'){
     for(const item of items){if(!item.taken&&dist(player.x,player.y,item.x,item.y)<76){pickup(item);return}}
     if(player.x>1760&&player.y>800){const missing=currentMission.required.filter(name=>!inventory.some(item=>item.name===name));if(missing.length===0)startSail();else showToast('필수 장비 부족 · '+missing.join(', '));}

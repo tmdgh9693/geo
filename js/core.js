@@ -8,8 +8,26 @@ let gamePaused=false, gameOver=false, pauseStartedAt=0, pauseVisualNow=performan
 let seaVerifyState=null, repairedMainTarget=false, returnToOfficeActive=false, returnFinishPending=false, postRepairExitLine=null;
 const WORK_SPEED_KNOTS=5, WORK_SPEED_UNITS=WORK_SPEED_KNOTS*7.6, ARRIVAL_RADIUS=420;
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r) }
-function showToast(t) { ui.toast.textContent = t; ui.toast.classList.add('on'); toastTime = 2.25 }
-function showModal(html) { ui.modal.innerHTML = html; ui.modal.style.display = 'flex'; requestAnimationFrame(()=>{ ui.modal.scrollTop=0; }); } function hideModal() { ui.modal.style.display = 'none' }
+function showToast(t) { if(ui.toast){ui.toast.textContent='';ui.toast.classList.remove('on');ui.toast.style.display='none';} toastTime=0; }
+function showModal(html, mode='dialog') {
+    const allowed=new Set(['dialog','briefing','task','sheet','menu','compact']);
+    const safeMode=allowed.has(mode)?mode:'dialog';
+    ui.modal.className=`modal-${safeMode}`;
+    ui.modal.innerHTML=`<div class="modalChrome"><span class="modalChromeTitle">안내</span><button type="button" class="modalMinBtn" aria-label="창 최소화" aria-expanded="true">−</button></div><div class="modalContent">${html}</div>`;
+    const label=ui.modal.querySelector('.tag');
+    const chromeTitle=ui.modal.querySelector('.modalChromeTitle');
+    if(chromeTitle&&label) chromeTitle.textContent=label.textContent.trim()||'안내';
+    const minBtn=ui.modal.querySelector('.modalMinBtn');
+    if(minBtn) minBtn.onclick=()=>{
+      const minimized=ui.modal.classList.toggle('modalMinimized');
+      minBtn.textContent=minimized?'+':'−';
+      minBtn.setAttribute('aria-expanded',minimized?'false':'true');
+      minBtn.setAttribute('aria-label',minimized?'창 펼치기':'창 최소화');
+    };
+    ui.modal.style.display='flex';
+    requestAnimationFrame(()=>{ ui.modal.scrollTop=0; const content=ui.modal.querySelector('.modalContent'); if(content)content.scrollTop=0; });
+}
+function hideModal() { ui.modal.style.display = 'none'; ui.modal.className=''; }
 function hex(a, b, c, d = 1) { return `rgba(${a},${b},${c},${d})` }
 function text(txt, x, y, size = 16, color = '#fff', align = 'left', weight = 700) { ctx.font = `${weight} ${size}px Trebuchet MS,Inter,system-ui,sans-serif`; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(txt, x, y); ctx.textAlign = 'left' }
 function modalIsOpen() { return getComputedStyle(ui.modal).display !== 'none' }

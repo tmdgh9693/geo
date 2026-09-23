@@ -1,59 +1,77 @@
 'use strict';
+// v2.2.1: always begin with the system overlay closed; pause is user-triggered only.
+gamePaused=false;
+gameOver=false;
+if(ui.systemOverlay){ui.systemOverlay.setAttribute('aria-hidden','true');ui.systemOverlay.style.display='none';}
 function loop(now){const dt=Math.min(.035,(now-last)/1000);last=now;const frozen=gamePaused||gameOver;const renderNow=frozen?pauseVisualNow:now;if(!frozen)update(dt,now);draw(renderNow);requestAnimationFrame(loop)}
 const qs=new URLSearchParams(location.search);
 if(qs.has('stage')){const s=clamp(Number(qs.get('stage'))-1,0,STAGES.length-1);unlockedStageIndex=Math.max(unlockedStageIndex,s);selectStage(s,false);if(qs.get('autostart')==='sail')startSail();}
 else if(qs.get('autostart')==='office'){selectStage(0,false)}
 else if(qs.get('autostart')==='gather'){selectStage(0,false);startGather()}
+else if(typeof showMainMenu==='function'){showMainMenu();}
 if(qs.get('snapshot')==='1'){const now=performance.now();update(.016,now);draw(now)}else requestAnimationFrame(loop);
 
-// v2.1.5: 고정 화면비를 사용하지 않고 실제 사용자 viewport를 그대로 사용한다.
+// v2.2.0: 실제 화면과 HUD/조작부의 실측 크기를 이용한 전체 반응형 레이아웃.
 (function installResponsiveViewport(){
-  let resizeTimer=0;
+  let raf=0, timer=0;
   const root=document.getElementById('root');
+  const top=document.getElementById('hudTop');
+  const bottom=document.getElementById('hudBottomInfo');
   const controls=document.getElementById('mouseControls');
   function viewportSize(){
     const vv=window.visualViewport;
-    return {
-      w:Math.max(1,Math.round(vv?vv.width:window.innerWidth)),
-      h:Math.max(1,Math.round(vv?vv.height:window.innerHeight))
-    };
+    return {w:Math.max(1,Math.round(vv?vv.width:window.innerWidth)),h:Math.max(1,Math.round(vv?vv.height:window.innerHeight))};
   }
-  function syncControlReserve(){
-    if(!controls) return;
-    const cs=getComputedStyle(controls);
-    const visible=cs.display!=='none' && cs.visibility!=='hidden';
-    const rect=visible?controls.getBoundingClientRect():{height:0};
-    const reserve=visible?Math.ceil(rect.height+12):0;
-    document.documentElement.style.setProperty('--controls-reserve',reserve+'px');
-    if(root) root.dataset.controlsVisible=visible?'true':'false';
+  function visibleHeight(el){
+    if(!el) return 0;
+    const cs=getComputedStyle(el);
+    if(cs.display==='none'||cs.visibility==='hidden') return 0;
+    return Math.max(0,Math.ceil(el.getBoundingClientRect().height));
   }
-  function syncLayout(){
+  function measure(){
     const {w,h}=viewportSize();
+    const orientation=w>=h?'landscape':'portrait';
+    const short=Math.min(w,h);
+    const density=(w<390||h<390||short<360)?'tiny':((w<760||h<560)?'compact':'normal');
     document.documentElement.style.setProperty('--app-w',w+'px');
     document.documentElement.style.setProperty('--app-h',h+'px');
-    document.documentElement.style.setProperty('--app-short',Math.min(w,h)+'px');
+    document.documentElement.style.setProperty('--app-short',short+'px');
     document.documentElement.style.setProperty('--app-long',Math.max(w,h)+'px');
-    const orientation=w>=h?'landscape':'portrait';
     if(root){
       root.dataset.orientation=orientation;
-      root.dataset.compact=(w<760||h<560)?'true':'false';
+      root.dataset.compact=density==='normal'?'false':'true';
       root.dataset.lowHeight=h<500?'true':'false';
+      root.dataset.density=density;
     }
-    // 논리 렌더링 좌표는 기존 게임 좌표계를 유지하고, CSS 표시영역만 실제 viewport를 100% 사용한다.
-    if(canvas){ canvas.width=W; canvas.height=H; }
-    if(mini){ mini.width=310; mini.height=220; }
-    requestAnimationFrame(syncControlReserve);
+    const controlsH=visibleHeight(controls);
+    document.documentElement.style.setProperty('--controls-reserve',(controlsH?controlsH+8:0)+'px');
+    // Measure again after control reserve can affect bottom HUD wrapping.
+    requestAnimationFrame(()=>{
+      const topH=visibleHeight(top);
+      const bottomH=visibleHeight(bottom);
+      document.documentElement.style.setProperty('--top-reserve',topH+'px');
+      document.documentElement.style.setProperty('--bottom-info-reserve',bottomH+'px');
+      document.documentElement.style.setProperty('--usable-h',Math.max(1,h-topH-bottomH-controlsH)+'px');
+      if(root) root.dataset.controlsVisible=controlsH>0?'true':'false';
+    });
+    if(canvas){canvas.width=W;canvas.height=H;}
+    if(mini){mini.width=310;mini.height=220;}
   }
-  function schedule(){ clearTimeout(resizeTimer); resizeTimer=setTimeout(syncLayout,16); }
+  function schedule(){
+    cancelAnimationFrame(raf);clearTimeout(timer);
+    raf=requestAnimationFrame(measure);
+    timer=setTimeout(measure,120);
+  }
   window.addEventListener('resize',schedule,{passive:true});
-  window.addEventListener('orientationchange',()=>{syncLayout();setTimeout(syncLayout,80);setTimeout(syncLayout,240);},{passive:true});
+  window.addEventListener('orientationchange',()=>{measure();setTimeout(measure,80);setTimeout(measure,260);},{passive:true});
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize',schedule,{passive:true});
     window.visualViewport.addEventListener('scroll',schedule,{passive:true});
   }
-  if(controls){
-    new MutationObserver(()=>requestAnimationFrame(syncControlReserve)).observe(controls,{attributes:true,attributeFilter:['style','class']});
-    if('ResizeObserver' in window) new ResizeObserver(()=>syncControlReserve()).observe(controls);
-  }
-  syncLayout();
+  [top,bottom,controls].forEach(el=>{
+    if(!el) return;
+    new MutationObserver(schedule).observe(el,{attributes:true,childList:true,subtree:true,attributeFilter:['style','class']});
+    if('ResizeObserver' in window) new ResizeObserver(schedule).observe(el);
+  });
+  measure();
 })();
