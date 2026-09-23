@@ -1194,7 +1194,7 @@ canvas {
 #mouseControls{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);width:520px;padding:9px;border-radius:18px;display:none;grid-template-columns:1fr 1fr 1fr 1fr .7fr .7fr .9fr;gap:7px;pointer-events:auto;z-index:5}.mouseCtrl{pointer-events:auto;cursor:pointer;min-height:46px;border:2px solid rgba(255,255,255,.22);border-radius:13px;background:linear-gradient(180deg,#5bc7ff,#358fe1);color:white;font-weight:1000;font-size:11px;box-shadow:0 5px 0 rgba(16,58,107,.35);touch-action:none}.mouseCtrl.throttle{background:linear-gradient(180deg,#63dcad,#36b983)}.mouseCtrl.work{background:linear-gradient(180deg,#ffe979,#ffc849);color:#423100}.mouseCtrl.small{background:linear-gradient(180deg,#7185c9,#4d64ad)}.mouseCtrl.pressed{transform:translateY(3px);box-shadow:0 2px 0 rgba(16,58,107,.35)}
 #progress{bottom:92px}#dockPrompt{bottom:126px}#toast{bottom:168px}#controls{display:none!important}
 @media(max-width:1150px){.stageGrid{grid-template-columns:repeat(3,minmax(0,1fr))}#mouseControls{width:min(520px,calc(100% - 40px));grid-template-columns:repeat(4,1fr)}.mouseCtrl{min-height:42px}.manualGrid{grid-template-columns:1fr 1fr}}
-@media(max-width:760px){.stageGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.manualGrid{grid-template-columns:1fr}.guideBtn{display:none}#mouseControls{display:none!important}#progress{bottom:84px}#dockPrompt{bottom:118px}#toast{bottom:150px}}
+@media(max-width:760px){.stageGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.manualGrid{grid-template-columns:1fr}.guideBtn{display:none}#progress{bottom:84px}#dockPrompt{bottom:118px}#toast{bottom:150px}}
 
 
 /* v1.8 interactive tutorial + comprehensive help */
@@ -1358,4 +1358,328 @@ button,.btn,.tinyBtn,.mouseCtrl,.touchBtn,.panelMinBtn,.guideBtn,.pauseBtn{
 canvas,img{
   -webkit-user-drag:none;user-drag:none;
   -webkit-touch-callout:none;
+}
+
+
+/* =========================================================
+   v2.1.2 FLEX 반응형 HUD + 사용자 화면 비율 최적화
+   ========================================================= */
+:root{
+  --ui-gap:clamp(6px,1vw,14px);
+  --ui-pad:clamp(8px,1.2vw,18px);
+  --control-reserve:clamp(76px,10vw,108px);
+}
+.ui{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:stretch;
+  gap:var(--ui-gap);
+  padding:var(--ui-pad);
+}
+.hudTopFlex{
+  position:relative;
+  z-index:12;
+  width:100%;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:var(--ui-gap);
+  pointer-events:none;
+}
+.hudTopFlex > #mission,
+.hudTopFlex > #telemetry,
+.hudTopFlex > #cameraPill{
+  position:relative!important;
+  inset:auto!important;
+  left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+  transform:none!important;
+  margin:0!important;
+}
+.hudTopFlex > #mission{
+  flex:1 1 clamp(300px,46vw,560px);
+  width:auto!important;
+  max-width:620px;
+}
+.hudTopFlex > #telemetry{
+  flex:0 1 clamp(190px,23vw,290px);
+  width:auto!important;
+  min-width:180px;
+  margin-left:auto!important;
+}
+.hudTopFlex > #cameraPill{
+  flex:0 0 auto;
+  align-self:flex-start;
+  order:2;
+  max-width:min(360px,34vw);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.hudBottomFlex{
+  position:relative;
+  z-index:10;
+  width:100%;
+  margin-top:auto;
+  padding-bottom:calc(var(--control-reserve) + env(safe-area-inset-bottom));
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:var(--ui-gap);
+  pointer-events:none;
+}
+.hudBottomFlex > #inventory,
+.hudBottomFlex > #instruments,
+.hudBottomFlex > #navcard{
+  position:relative!important;
+  inset:auto!important;
+  left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+  transform:none!important;
+  margin:0!important;
+}
+.hudBottomFlex > #inventory{flex:1 1 clamp(280px,46vw,550px);width:auto!important;max-width:560px}
+.hudBottomFlex > #instruments{flex:0 1 clamp(245px,31vw,345px);width:auto!important;max-width:345px}
+.hudBottomFlex > #navcard{flex:0 1 clamp(170px,25vw,300px);width:clamp(170px,25vw,300px)!important;aspect-ratio:310/220;height:auto!important;margin-left:auto!important}
+
+/* 중앙 플레이 영역을 가리는 부수 UI는 화면 크기에 맞춰 자동 축소 */
+#prepChecklist{width:clamp(220px,24vw,294px)}
+#tutorialCoach{width:min(520px,calc(100% - 2*var(--ui-pad)))}
+#modal{width:min(820px,calc(100% - 2*var(--ui-pad)))}
+#progress{width:clamp(220px,40vw,560px)}
+
+/* 운항 버튼: 게임 상태 JS의 display:grid / none 값을 그대로 존중 */
+#mouseControls{
+  position:absolute;
+  left:50%;right:auto;
+  bottom:max(8px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  width:min(760px,calc(100% - 2*var(--ui-pad)));
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:clamp(5px,.8vw,9px);
+  z-index:60;
+}
+.mouseCtrl{min-width:0;padding:8px clamp(5px,.7vw,10px);font-size:clamp(9px,1vw,12px)}
+
+/* 캔버스는 CSS 화면 비율에 맞춰 늘리고 내부 해상도는 JS에서 맞춤 */
+#game{width:100%;height:100%;object-fit:cover}
+
+@media(max-width:900px){
+  .hudTopFlex{align-items:stretch}
+  .hudTopFlex > #mission{flex:1 1 62%;max-width:none}
+  .hudTopFlex > #telemetry{flex:0 1 34%;min-width:170px}
+  .hudTopFlex > #cameraPill{order:3;flex:0 1 auto;max-width:50%;font-size:10px}
+  .hudBottomFlex{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .hudBottomFlex > #inventory{flex:1 1 55%;max-width:none}
+  .hudBottomFlex > #instruments{flex:1 1 42%;max-width:320px}
+  .hudBottomFlex > #navcard{flex:0 0 clamp(150px,24vw,220px)}
+  #mouseControls{grid-template-columns:repeat(4,minmax(0,1fr));width:calc(100% - 16px);padding:6px}
+  .mouseCtrl{min-height:44px;font-size:10px}
+}
+
+@media(max-width:760px){
+  :root{--ui-pad:max(6px,env(safe-area-inset-left));--ui-gap:6px;--control-reserve:108px}
+  html,body,#root{width:100%;height:100%;min-height:100%;overflow:hidden}
+  .ui{padding:max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));gap:6px}
+  .hudTopFlex{gap:6px;align-content:flex-start}
+  .hudTopFlex > #mission{flex:1 1 100%;width:100%!important;max-width:none;padding:9px 132px 9px 10px!important}
+  .hudTopFlex > #telemetry{flex:1 1 clamp(150px,46%,220px);min-width:0;width:auto!important;padding:8px 9px!important;text-align:left}
+  .hudTopFlex > #cameraPill{flex:1 1 clamp(150px,46%,240px);max-width:none;width:auto!important;align-self:center;text-align:center;padding:7px 8px!important}
+  .teleMain{font-size:clamp(18px,6vw,24px)}
+  .teleSub{font-size:9px}
+  #prepChecklist{left:max(6px,env(safe-area-inset-left))!important;top:auto!important;bottom:calc(118px + env(safe-area-inset-bottom))!important;width:min(230px,58vw)!important;max-height:44%;overflow:auto}
+  #tutorialCoach{left:50%!important;top:auto!important;bottom:calc(118px + env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;width:calc(100% - 12px)!important;max-height:34%;overflow:auto}
+  .hudBottomFlex{padding-bottom:calc(104px + env(safe-area-inset-bottom));gap:6px;align-items:flex-end}
+  .hudBottomFlex > #inventory{flex:1 1 100%;width:100%!important;max-width:none!important;padding:8px 9px!important}
+  .hudBottomFlex > #instruments{flex:1 1 calc(60% - 3px);width:auto!important;max-width:none!important;padding:7px 8px!important}
+  .hudBottomFlex > #navcard{flex:0 1 calc(40% - 3px);width:min(38vw,170px)!important;min-width:120px;max-width:170px;aspect-ratio:310/220;height:auto!important;margin-left:auto!important}
+  #progress{bottom:calc(104px + env(safe-area-inset-bottom))!important;width:58%!important}
+  #dockPrompt{bottom:calc(142px + env(safe-area-inset-bottom))!important;max-width:calc(100% - 14px)}
+  #toast{bottom:calc(190px + env(safe-area-inset-bottom))!important;max-width:calc(100% - 14px)}
+  .hazardBanner,.weatherBanner{bottom:calc(192px + env(safe-area-inset-bottom))!important;max-width:calc(100% - 14px)}
+  #mouseControls{
+    display:none; /* JS가 항해 상태일 때 inline grid로 켜며, !important를 사용하지 않음 */
+    left:max(6px,env(safe-area-inset-left));right:max(6px,env(safe-area-inset-right));
+    bottom:max(6px,env(safe-area-inset-bottom));transform:none;width:auto;
+    grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:6px;
+  }
+  .mouseCtrl{min-height:46px!important;font-size:clamp(9px,2.6vw,11px)!important;padding:5px 3px!important}
+  .mouseCtrl.small,.mouseCtrl.work{min-height:42px!important}
+  #touch{display:none!important}
+  .minimizablePanel.panelMinimized{flex:0 0 40px!important;width:40px!important;height:38px!important;min-width:40px!important}
+}
+
+@media(max-width:440px){
+  .hudTopFlex > #mission{padding-right:122px!important}
+  .hudTopFlex > #telemetry{flex-basis:42%}
+  .hudTopFlex > #cameraPill{flex-basis:54%;font-size:8.5px}
+  .hudBottomFlex > #instruments{flex-basis:58%}
+  .hudBottomFlex > #navcard{flex-basis:40%;min-width:108px;width:38vw!important}
+  .invHead{flex-wrap:wrap;gap:5px}.invTools{flex-wrap:wrap;gap:4px}
+  #mouseControls{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+@media(orientation:landscape) and (max-height:560px){
+  :root{--control-reserve:62px}
+  .ui{padding:6px}
+  .hudTopFlex{max-height:92px;overflow:visible}
+  .hudTopFlex > #mission{flex:1 1 52%;padding:7px 130px 7px 9px!important}
+  .hudTopFlex > #mission .missionText{display:none}
+  .hudTopFlex > #telemetry{flex:0 1 24%;padding:6px 8px!important}
+  .hudTopFlex > #cameraPill{flex:0 1 20%;font-size:8px;padding:6px!important}
+  .hudBottomFlex{padding-bottom:62px}
+  .hudBottomFlex > #inventory{display:none!important}
+  .hudBottomFlex > #instruments{flex:0 1 250px;padding:5px 7px!important}
+  .hudBottomFlex > #navcard{flex:0 1 140px;width:140px!important}
+  #mouseControls{bottom:4px;grid-template-columns:repeat(7,minmax(0,1fr));padding:4px;gap:4px}
+  .mouseCtrl{min-height:40px!important;font-size:8.5px!important}
+  #progress{bottom:58px!important}
+  #dockPrompt{bottom:86px!important}
+  #toast{bottom:126px!important}
+}
+
+
+/* =========================================================
+   v2.1.3 전체 UI / UX / 메시지박스 FLEX 반응형
+   ========================================================= */
+:root{
+  --fluid-space:clamp(6px,1.2vmin,18px);
+  --fluid-radius:clamp(14px,2.2vmin,26px);
+  --fluid-text:clamp(11px,1.35vmin,15px);
+  --fluid-small:clamp(9px,1.05vmin,12px);
+  --fluid-title:clamp(18px,2.5vmin,30px);
+  --modal-w:min(92vw,820px);
+  --modal-h:min(88%,760px);
+}
+
+/* 모든 주요 패널은 내용과 화면 크기에 맞춰 수축/확장 */
+#mission,#telemetry,#cameraPill,#prepChecklist,#inventory,#instruments,#navcard,#tutorialCoach,
+#modal,.systemPanel,#dockPrompt,#controls,#mouseControls,.hazardBanner,.weatherBanner{
+  min-width:0;
+  max-width:calc(100% - 2*var(--ui-pad));
+}
+#mission,#telemetry,#prepChecklist,#inventory,#instruments,#tutorialCoach,#modal,.systemPanel{
+  border-radius:var(--fluid-radius);
+}
+.missionTitle{font-size:clamp(16px,2.1vmin,22px)}
+.missionText,.teleSub,#tutorialCoach,.systemPanel p,#modal p{font-size:var(--fluid-text)}
+.teleMain{font-size:clamp(20px,4.2vmin,32px)}
+.eyebrow,.teleLabel,.stageLabel,.prepLoad{font-size:var(--fluid-small)}
+
+/* 상/하단 HUD는 완전 flex 흐름으로, 폭이 부족하면 자연스럽게 다음 줄로 */
+.hudTopFlex,.hudBottomFlex{min-width:0}
+.hudTopFlex>* ,.hudBottomFlex>*{min-width:0}
+#mission{order:1}
+#cameraPill{order:2}
+#telemetry{order:3}
+
+/* 메시지/스토리/도움말/미니게임 공통 */
+#modal{
+  width:var(--modal-w)!important;
+  max-height:var(--modal-h)!important;
+  display:flex;
+  flex-direction:column;
+  gap:clamp(6px,1.1vmin,14px);
+  padding:clamp(14px,2.5vmin,30px)!important;
+  overflow:auto;
+  overscroll-behavior:contain;
+}
+#modal>*{min-width:0;max-width:100%}
+#modal h1{font-size:clamp(28px,6vmin,58px)!important;margin:clamp(8px,1.5vmin,16px) 0!important}
+#modal h2{font-size:clamp(20px,3.8vmin,32px)!important;margin:clamp(5px,1vmin,12px) 0!important}
+#modal h3{font-size:clamp(16px,2.8vmin,24px)!important}
+#modal p,#modal li{font-size:clamp(11px,1.5vmin,14px);line-height:1.55;overflow-wrap:anywhere}
+#modal .actions,.systemActions{
+  display:flex!important;
+  flex-wrap:wrap;
+  gap:clamp(6px,1vmin,10px)!important;
+  width:100%;
+}
+#modal .actions .btn,.systemActions .btn{
+  flex:1 1 clamp(130px,28%,220px);
+  min-width:0;
+  min-height:clamp(42px,6vmin,52px);
+  white-space:normal;
+  text-align:center;
+}
+
+/* 동적으로 만들어지는 메뉴/설명/스테이지/미니게임 그리드는 화면 폭에 따라 자동 컬럼 */
+#modal .stageGrid,#modal .manualGrid,#modal .helpManualGrid,#modal .repairGrid,
+#modal .gameGrid,#modal .choiceGrid,#modal .equipmentGrid,#modal [class*="Grid"]{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));
+  gap:clamp(7px,1.2vmin,12px);
+  width:100%;
+}
+#modal button,#modal .btn,#systemOverlay button{
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+
+/* 설정창 / 게임오버창도 동일한 flex 규칙 */
+.systemOverlay{
+  padding:clamp(8px,2vmin,22px);
+  align-items:center;
+  justify-content:center;
+}
+.systemPanel{
+  width:min(92vw,560px)!important;
+  max-height:min(88%,700px)!important;
+  padding:clamp(16px,3vmin,30px)!important;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:clamp(6px,1.2vmin,12px);
+  overflow:auto;
+}
+.systemPanel h2{font-size:clamp(22px,4vmin,32px)!important}
+.systemIcon{font-size:clamp(38px,8vmin,58px)!important}
+
+/* 알림/프롬프트도 좁은 화면에서 줄바꿈 */
+#dockPrompt,#toast,.hazardBanner,.weatherBanner{
+  white-space:normal!important;
+  text-align:center;
+  line-height:1.35;
+  font-size:clamp(10px,1.5vmin,13px)!important;
+}
+#toast{width:max-content;max-width:min(92vw,620px)}
+
+/* 모바일 세로 */
+@media(max-width:760px){
+  :root{--modal-w:calc(100vw - 12px);--modal-h:calc(100% - 12px)}
+  .hudTopFlex{display:flex!important;flex-wrap:wrap!important;align-items:stretch!important}
+  .hudTopFlex>#mission{flex:1 1 100%!important}
+  .hudTopFlex>#cameraPill{flex:1 1 calc(48% - 3px)!important;order:2!important}
+  .hudTopFlex>#telemetry{flex:1 1 calc(52% - 3px)!important;order:3!important}
+  .hudBottomFlex{display:flex!important;flex-wrap:wrap!important}
+  .hudBottomFlex>#inventory{flex:1 1 100%!important}
+  .hudBottomFlex>#instruments{flex:1 1 58%!important}
+  .hudBottomFlex>#navcard{flex:1 1 38%!important;min-width:108px!important}
+  #modal{left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important}
+  #modal .actions .btn,.systemActions .btn{flex:1 1 46%;font-size:clamp(10px,3vw,13px)}
+  #modal .stageGrid,#modal .manualGrid,#modal .helpManualGrid,#modal .repairGrid,
+  #modal .gameGrid,#modal .choiceGrid,#modal .equipmentGrid,#modal [class*="Grid"]{
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,135px),1fr));
+  }
+  .systemPanel{width:calc(100vw - 12px)!important;max-height:calc(100% - 12px)!important}
+}
+
+/* 아주 좁은 화면에서는 메시지 버튼을 세로로 */
+@media(max-width:420px){
+  #modal .actions,.systemActions{flex-direction:column}
+  #modal .actions .btn,.systemActions .btn{flex:0 0 auto;width:100%}
+  #modal [class*="Grid"]{grid-template-columns:1fr!important}
+  .hudTopFlex>#cameraPill,.hudTopFlex>#telemetry{flex:1 1 100%!important}
+}
+
+/* 낮은 가로화면: 높이 우선 최적화 */
+@media(orientation:landscape) and (max-height:560px){
+  #modal{width:min(88vw,900px)!important;max-height:calc(100% - 8px)!important;padding:10px 14px!important;gap:5px}
+  #modal h1{font-size:clamp(24px,7vh,38px)!important;margin:4px 0!important}
+  #modal h2{font-size:clamp(18px,5vh,26px)!important;margin:3px 0!important}
+  #modal p,#modal li{font-size:10px;line-height:1.35}
+  #modal .actions{margin-top:6px!important}
+  #modal .actions .btn{min-height:36px;padding:7px 9px!important}
+  .systemPanel{width:min(82vw,620px)!important;max-height:calc(100% - 8px)!important;padding:12px!important}
 }

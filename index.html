@@ -4,31 +4,36 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>출동! 항로표지 긴급출동</title>
+    <title>출동! 항로표지 긴급출동 v2.1.3 Flex Responsive UI/UX</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
     <div id="root"><canvas id="game" width="1920" height="1080"></canvas>
         <div class="ui">
-            <div id="mission" class="glass">
-                <div class="eyebrow">항로표지 안전학교</div><div class="stageLabel" id="stageLabel">STORY MODE · TUTORIAL</div><button class="tinyBtn guideBtn" id="guideBtn">도움말</button><button class="tinyBtn pauseBtn" id="pauseBtn" aria-label="설정 및 일시정지">⚙ 설정</button>
-                <div class="missionTitle" id="phaseTitle">항로표지 긴급출동</div>
-                <div class="missionText" id="missionText">사무실의 전화를 받아 오늘의 임무를 확인하세요.</div>
+            <div id="hudTop" class="hudTopFlex">
+                <div id="mission" class="glass">
+                    <div class="eyebrow">항로표지 안전학교</div>
+                    <div class="stageLabel" id="stageLabel">STORY MODE · TUTORIAL</div>
+                    <button class="tinyBtn guideBtn" id="guideBtn">도움말</button>
+                    <button class="tinyBtn pauseBtn" id="pauseBtn" aria-label="설정 및 일시정지">⚙ 설정</button>
+                    <div class="missionTitle" id="phaseTitle">항로표지 긴급출동</div>
+                    <div class="missionText" id="missionText">사무실의 전화를 받아 오늘의 임무를 확인하세요.</div>
+                </div>
+                <div id="cameraPill" class="glass">기본 시점 · 탑뷰(진행방향) · C · 장난감 항구 스타일</div>
+                <div id="telemetry" class="glass">
+                    <div class="teleLabel" id="hudLabel">MISSION STATUS</div>
+                    <div class="teleMain" id="hudMain">대기</div>
+                    <div class="teleSub" id="hudSub">스토리 모드 · 스테이지 진행 · 준비물 연동 미니게임</div>
+                </div>
             </div>
-
             <div id="prepChecklist" class="glass">
                 <div class="prepHead"><b>이번 임무 필수 준비물</b><span class="prepLoad" id="prepLoad">0 / 0kg</span></div>
                 <div class="prepItems" id="prepItems"></div>
             </div>
             <div id="hazardBanner" class="hazardBanner">⚠ 전방 암초 주의</div>
             <div id="weatherBanner" class="weatherBanner">🌊 높은 파도 구간</div>
-            <div id="telemetry" class="glass">
-                <div class="teleLabel" id="hudLabel">MISSION STATUS</div>
-                <div class="teleMain" id="hudMain">대기</div>
-                <div class="teleSub" id="hudSub">스토리 모드 · 스테이지 진행 · 준비물 연동 미니게임</div>
-            </div>
-            <div id="cameraPill" class="glass">기본 시점 · 탑뷰(진행방향) · C · 장난감 항구 스타일</div>
+            <div id="hudBottomInfo" class="hudBottomFlex">
             <div id="inventory" class="glass">
                 <div class="invHead"><b>출동 장비</b>
                     <div class="invTools"><button class="tinyBtn" id="weightBtn">장비 무게표 Q</button><span
@@ -54,6 +59,7 @@
                 </div>
             </div>
             <div id="navcard" class="glass"><canvas id="mini" width="310" height="220"></canvas></div>
+            </div>
             <div id="progress">
                 <div id="progressBar"></div>
             </div>
@@ -78,7 +84,7 @@
             <div id="modal">
                 <div class="tag">항로표지 안전학교 · STORY MODE</div>
                 <h1>바다의 빛을<br>지켜라!</h1>
-                <p>여러 항로표지에서 이상 신호가 들어오기 시작했습니다. 신입 점검원이 되어 단계별 임무를 해결하고 밤바다의 안전한 길을 되찾아 주세요.</p>
+                <p>태풍이 지나간 여수 앞바다. 여러 항로표지에서 이상 신호가 들어오기 시작했습니다. 신입 점검원이 되어 단계별 임무를 해결하고 밤바다의 안전한 길을 되찾아 주세요.</p>
                 <div class="actions">
                     <button class="btn" id="startBtn">스토리 시작</button>
                     <button class="btn alt" id="stageBtn">스테이지 선택</button>
