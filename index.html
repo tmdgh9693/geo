@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>출동! 항로표지 긴급출동 v2.0</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <div id="root"><canvas id="game" width="1920" height="1080"></canvas>
+        <div class="ui">
+            <div id="mission" class="glass">
+                <div class="eyebrow">항로표지 안전학교</div><div class="stageLabel" id="stageLabel">STORY MODE · TUTORIAL</div><button class="tinyBtn guideBtn" id="guideBtn">도움말</button><button class="tinyBtn pauseBtn" id="pauseBtn" aria-label="설정 및 일시정지">⚙ 설정</button>
+                <div class="missionTitle" id="phaseTitle">항로표지 긴급출동</div>
+                <div class="missionText" id="missionText">사무실의 전화를 받아 오늘의 임무를 확인하세요.</div>
+            </div>
+
+            <div id="prepChecklist" class="glass">
+                <div class="prepHead"><b>이번 임무 필수 준비물</b><span class="prepLoad" id="prepLoad">0 / 0kg</span></div>
+                <div class="prepItems" id="prepItems"></div>
+            </div>
+            <div id="hazardBanner" class="hazardBanner">⚠ 전방 암초 주의</div>
+            <div id="weatherBanner" class="weatherBanner">🌊 높은 파도 구간</div>
+            <div id="telemetry" class="glass">
+                <div class="teleLabel" id="hudLabel">MISSION STATUS</div>
+                <div class="teleMain" id="hudMain">대기</div>
+                <div class="teleSub" id="hudSub">스토리 모드 · 스테이지 진행 · 준비물 연동 미니게임</div>
+            </div>
+            <div id="cameraPill" class="glass">기본 시점 · 탑뷰(진행방향) · C · 장난감 항구 스타일</div>
+            <div id="inventory" class="glass">
+                <div class="invHead"><b>출동 장비</b>
+                    <div class="invTools"><button class="tinyBtn" id="weightBtn">장비 무게표 Q</button><span
+                            id="weightText">0 / 55 kg</span></div>
+                </div>
+                <div class="chips" id="chips"><span class="chip">비어 있음</span></div>
+            </div>
+            <div id="instruments" class="glass">
+                <div class="inst"><span>ENGINE</span>
+                    <div class="track">
+                        <div class="fill" id="engineBar"></div>
+                    </div><b id="engineText">0%</b>
+                </div>
+                <div class="inst"><span>RUDDER</span>
+                    <div class="track">
+                        <div class="fill" id="rudderBar"></div>
+                    </div><b id="rudderText">중립</b>
+                </div>
+                <div class="inst"><span>SAFETY</span>
+                    <div class="track">
+                        <div class="fill warn" id="safetyBar"></div>
+                    </div><b id="safetyText">100%</b>
+                </div>
+            </div>
+            <div id="navcard" class="glass"><canvas id="mini" width="310" height="220"></canvas></div>
+            <div id="progress">
+                <div id="progressBar"></div>
+            </div>
+            <div id="dockPrompt" class="glass">도착 구간 · 5 knot 이하에서 E로 작업 시작</div>
+            <div id="controls" class="glass">키보드 조작 가능</div>
+            <div id="mouseControls" class="glass" aria-label="마우스 항해 조작">
+                <button class="mouseCtrl steer" data-hold="a">◀ 좌회전</button>
+                <button class="mouseCtrl throttle" data-hold="w">▲ 가속</button>
+                <button class="mouseCtrl throttle" data-hold="s">▼ 감속/후진</button>
+                <button class="mouseCtrl steer" data-hold="d">우회전 ▶</button>
+                <button class="mouseCtrl small" id="mouseNeutral">중립</button>
+                <button class="mouseCtrl small" id="mouseCamera">시점</button>
+                <button class="mouseCtrl work" id="mouseWork">작업</button>
+            </div>
+            <div id="toast"></div>
+            <div id="tutorialCoach" class="glass" aria-live="polite">
+                <div class="tutorialStepBadge" id="tutorialStepBadge">튜토리얼</div>
+                <div class="tutorialCoachTitle" id="tutorialCoachTitle">직접 움직여 보세요</div>
+                <div class="tutorialCoachText" id="tutorialCoachText"></div>
+                <div class="tutorialCoachProgress" id="tutorialCoachProgress"></div>
+            </div>
+            <div id="modal">
+                <div class="tag">항로표지 안전학교 · STORY MODE</div>
+                <h1>바다의 빛을<br>지켜라!</h1>
+                <p>태풍이 지나간 여수 앞바다. 여러 항로표지에서 이상 신호가 들어오기 시작했습니다. 신입 점검원이 되어 단계별 임무를 해결하고 밤바다의 안전한 길을 되찾아 주세요.</p>
+                <div class="actions">
+                    <button class="btn" id="startBtn">스토리 시작</button>
+                    <button class="btn alt" id="stageBtn">스테이지 선택</button>
+                    <button class="btn alt" id="manualBtn">게임 설명서</button>
+                </div>
+            </div>
+            <div id="systemOverlay" class="systemOverlay" aria-live="polite" aria-hidden="true">
+                <div class="systemPanel glass">
+                    <div class="systemKicker" id="systemKicker">GAME PAUSED</div>
+                    <div class="systemIcon" id="systemIcon">⏸️</div>
+                    <h2 id="systemTitle">일시정지</h2>
+                    <p id="systemText">게임이 잠시 멈췄습니다.</p>
+                    <div class="systemActions" id="systemActions"></div>
+                </div>
+            </div>
+            <div id="touch">
+                <div class="touchCluster left"><button class="touchBtn" data-k="a">◀</button><button class="touchBtn"
+                        data-k="d">▶</button></div>
+                <div class="touchCluster right"><button class="touchBtn" data-k="w">▲</button><button class="touchBtn"
+                        data-k="s">▼</button></div>
+            </div>
+        </div>
+    </div>
+    <script src="js/core.js"></script>
+    <script src="js/game-data.js"></script>
+    <script src="js/stage-system.js"></script>
+    <script src="js/mission.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/fauna.js"></script>
+    <script src="js/equipment-games.js"></script>
+    <script src="js/repair.js"></script>
+    <script src="js/shore.js"></script>
+    <script src="js/simulation.js"></script>
+    <script src="js/render-office.js"></script>
+    <script src="js/render-sailing.js"></script>
+    <script src="js/system-menu.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
