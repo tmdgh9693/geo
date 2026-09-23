@@ -2454,3 +2454,44 @@ body{touch-action:none!important;-webkit-text-size-adjust:100%!important}
 #mission .eyebrow,#mission .stageLabel,#mission .missionTitle,#mission .missionText,#cameraPill{display:none!important}
 #mission{width:auto!important;min-width:0!important;max-width:none!important;padding:5px 6px!important;display:flex!important;align-items:center!important;gap:6px!important;background:rgba(7,18,29,.50)!important}
 #mission .tinyBtn{position:static!important;margin:0!important;min-height:38px!important}
+
+
+/* v2.3 PRO VISUAL PASS --------------------------------------------------- */
+:root{--pro-bg:#071823;--pro-panel:rgba(7,24,35,.88);--pro-panel2:rgba(12,37,51,.92);--pro-line:rgba(141,204,220,.22);--pro-cyan:#5fd5e6;--pro-green:#74d9b3;--pro-amber:#f1b84b;--pro-red:#f06f72;--pro-text:#edf7f8;--pro-muted:#aac2ca}
+html,body{background:#071823;font-family:Inter,"Pretendard","Noto Sans KR",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+#root{background:linear-gradient(180deg,#163b50 0%,#0b2637 45%,#071923 100%)}
+.glass{background:linear-gradient(180deg,rgba(10,31,44,.94),rgba(6,22,33,.90));border:1px solid var(--pro-line);box-shadow:0 10px 30px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.035);backdrop-filter:blur(12px);border-radius:12px!important}
+#mission{border-left:3px solid var(--pro-cyan);max-width:440px;padding:11px 13px}
+#mission .eyebrow{font-size:9px;color:#89aeb9;letter-spacing:.18em}
+.stageLabel{color:#70dce6!important;font-size:10px!important;letter-spacing:.12em!important}
+.missionTitle{font-size:16px!important;font-weight:800!important;letter-spacing:-.02em;margin:4px 0 2px!important}
+.missionText{font-size:11px!important;color:#b9cbd1!important;line-height:1.38!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#telemetry{width:250px;border-right:3px solid var(--pro-green);padding:10px 12px}
+.teleLabel{font-size:9px;color:#8baab3;letter-spacing:.17em}.teleMain{font-size:25px;letter-spacing:-.03em}.teleSub{font-size:10px;color:#b7cbd1}
+#cameraPill{background:rgba(5,20,29,.72);border:1px solid rgba(128,194,210,.18);box-shadow:none;font-size:10px;color:#9fb8c0;padding:7px 11px}
+#prepChecklist,#inventory,#instruments,#navcard{border-color:rgba(95,213,230,.16)}
+.prepItem,.chip{border:1px solid rgba(149,202,214,.12);background:rgba(122,170,181,.07);border-radius:8px}.prepItem.done{background:rgba(68,185,144,.14);border-color:rgba(116,217,179,.25)}
+.tinyBtn,.btn,.mouseCtrl,.touchBtn,.repairOption{border:1px solid rgba(151,207,219,.24)!important;background:linear-gradient(180deg,#173f50,#0d2f3e)!important;color:#e9f7f9!important;border-radius:8px!important;box-shadow:0 4px 12px rgba(0,0,0,.18)!important;font-weight:750!important;transition:transform .12s ease,background .12s ease,border-color .12s ease!important}
+.tinyBtn:active,.btn:active,.mouseCtrl:active,.touchBtn:active,.repairOption:active{transform:translateY(1px) scale(.985)!important;background:#205268!important}
+.mouseCtrl.throttle{border-color:rgba(116,217,179,.35)!important}.mouseCtrl.work{background:linear-gradient(180deg,#b57a20,#875614)!important;border-color:rgba(241,184,75,.42)!important}
+#mouseControls{background:rgba(5,18,27,.84)!important;border:1px solid rgba(129,190,205,.18)!important;box-shadow:0 -8px 24px rgba(0,0,0,.18)!important;border-radius:12px!important}
+#instruments .inst{margin:7px 0}.track{height:7px;border:0;background:#05151f}.fill{background:linear-gradient(90deg,#43a8bd,#6fd8b0)}.fill.warn{background:linear-gradient(90deg,#6fd8b0,#e9ae48,#e9656a)}
+#navcard{background:#061a24}.hazardBanner,.weatherBanner,#dockPrompt,#toast{border-radius:9px!important;box-shadow:0 8px 24px rgba(0,0,0,.18)!important}
+#modal{background:linear-gradient(160deg,rgba(6,25,36,.98),rgba(9,39,52,.96))!important;border:1px solid rgba(124,200,216,.22)!important;box-shadow:0 30px 90px rgba(0,0,0,.42)!important;border-radius:14px!important}
+#modal h1{font-weight:850!important;letter-spacing:-.045em!important;color:#eff9fa!important}.tag{color:#68d5e4!important}.principleCard,.gameStatus{background:rgba(11,37,49,.72)!important;border:1px solid rgba(112,191,206,.16)!important;color:#c8dadd!important;border-radius:9px!important}
+.boltMini,.cableEnd,.cableSocket,.latchMini,[data-safety],[data-rope],[data-blueprint],.patternChoice,.chainLinkMini{border-radius:9px!important;border:1px solid rgba(137,197,210,.22)!important;box-shadow:none!important;background:#102f3e!important;color:#eaf6f7!important}
+.boltMini.ok,.cableEnd.ok,.cableSocket.ok,.latchMini.ok,[data-safety].ok,[data-rope].ok,.chainLinkMini.ok{background:#17604e!important;border-color:#5fd2aa!important}
+.gauge,.solarMeter,.lensScaleTrack{background:#071d29!important;border-color:rgba(137,197,210,.18)!important}.gaugeGood,.lensGoodZone{background:rgba(88,211,166,.32)!important}
+@media(max-width:720px){#mission{max-width:none}.missionTitle{font-size:14px!important}.missionText{font-size:10px!important;-webkit-line-clamp:1}.teleMain{font-size:21px}.glass{backdrop-filter:blur(8px)}#mouseControls{gap:5px!important;padding:6px!important}.mouseCtrl{min-height:44px!important;font-size:11px!important}}
+
+
+/* v2.3 objective HUD: non-blocking guidance instead of popup messages */
+#mission{width:min(420px,calc(100% - 36px))!important;display:grid!important;grid-template-columns:1fr auto auto!important;grid-template-areas:"stage guide pause" "title guide pause" "text guide pause"!important;column-gap:7px!important;row-gap:1px!important;padding:8px 9px 8px 11px!important;pointer-events:none!important}
+#mission .eyebrow{display:none!important}
+#mission .stageLabel{grid-area:stage;display:block!important;font-size:8px!important;color:#69d9e7!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#mission .missionTitle{grid-area:title;display:block!important;font-size:13px!important;margin:1px 0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#mission .missionText{grid-area:text;display:block!important;font-size:9.5px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:#a9c0c8!important}
+#mission .guideBtn{grid-area:guide;pointer-events:auto!important;align-self:center!important}
+#mission .pauseBtn{grid-area:pause;pointer-events:auto!important;align-self:center!important}
+@media(max-width:620px){#mission{width:min(72vw,330px)!important;grid-template-columns:1fr auto!important;grid-template-areas:"stage pause" "title pause" "text pause"!important;padding:6px 7px 6px 9px!important}.guideBtn{display:none!important}#mission .missionTitle{font-size:11px!important}#mission .missionText{font-size:8.5px!important}.pauseBtn{min-width:42px!important;font-size:0!important}.pauseBtn::after{content:'⚙';font-size:16px}}
+@media(orientation:landscape) and (max-height:500px){#mission{width:min(46vw,360px)!important}.missionText{display:none!important}}

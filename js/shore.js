@@ -1,6 +1,6 @@
 'use strict';
 // 최종 스테이지: 거문도 접안시설에서 하선해 등대까지 직접 이동하는 구간
-const shorePlayer={x:310,y:870,speed:315};
+const shorePlayer={x:310,y:870,speed:315,moving:false,facing:1,walkPhase:0};
 let shoreMoveTarget=null,shoreAutoAction=false;
 let shoreMode='toLighthouse'; // toLighthouse | toBoat
 const shoreLighthouse={x:1510,y:235};
@@ -20,7 +20,7 @@ function updateShore(dt){
   let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
   const keyboard=Math.abs(dx)+Math.abs(dy)>0;if(keyboard){shoreMoveTarget=null;shoreAutoAction=false;}
   if(!keyboard&&shoreMoveTarget){const tx=shoreMoveTarget.x-shorePlayer.x,ty=shoreMoveTarget.y-shorePlayer.y,d=Math.hypot(tx,ty);if(d<10){shorePlayer.x=shoreMoveTarget.x;shorePlayer.y=shoreMoveTarget.y;shoreMoveTarget=null;const act=shoreAutoAction;shoreAutoAction=false;if(act)shoreInteract();}else{dx=tx/d;dy=ty/d}}
-  const l=Math.hypot(dx,dy)||1;shorePlayer.x=clamp(shorePlayer.x+dx/l*shorePlayer.speed*dt,210,1650);shorePlayer.y=clamp(shorePlayer.y+dy/l*shorePlayer.speed*dt,170,930);
+  const moving=Math.abs(dx)+Math.abs(dy)>.001,l=Math.hypot(dx,dy)||1;shorePlayer.x=clamp(shorePlayer.x+dx/l*shorePlayer.speed*dt,210,1650);shorePlayer.y=clamp(shorePlayer.y+dy/l*shorePlayer.speed*dt,170,930);shorePlayer.moving=moving;if(moving){if(Math.abs(dx)>.05)shorePlayer.facing=dx<0?-1:1;shorePlayer.walkPhase+=dt*9.5}else shorePlayer.walkPhase*=.88;
   const target=shoreMode==='toBoat'?shoreDock:shoreLighthouse;const d=dist(shorePlayer.x,shorePlayer.y,target.x,target.y);
   if(shoreMode==='toBoat'){ui.hudMain.textContent=d<120?'선착장 도착':'선박으로 복귀';ui.hudSub.textContent=d<120?'E 또는 선착장을 클릭해 승선':'길을 따라 선착장으로 내려가세요';}
   else{ui.hudMain.textContent=d<120?'도착':'등대로 이동';ui.hudSub.textContent=d<120?'거문도등대 작업 지점 · E 또는 등대 클릭':'길을 따라 등대까지 올라가세요';}
@@ -93,6 +93,6 @@ function drawShore(){
   ctx.save();ctx.translate(shoreLighthouse.x,shoreLighthouse.y);ctx.fillStyle='#fff';rr(-34,-82,68,145,16);ctx.fill();ctx.fillStyle='#e95358';rr(-44,-96,88,24,10);ctx.fill();ctx.fillStyle='#243b63';ctx.fillRect(-24,-45,48,24);ctx.fillStyle='#fff3a0';ctx.beginPath();ctx.arc(0,-72,13,0,TAU);ctx.fill();ctx.shadowColor='#fff3a0';ctx.shadowBlur=34;ctx.beginPath();ctx.arc(0,-72,9,0,TAU);ctx.fill();ctx.shadowBlur=0;ctx.restore();
   ctx.strokeStyle='rgba(255,227,100,.72)';ctx.lineWidth=5;ctx.setLineDash([12,10]);ctx.beginPath();ctx.arc(shoreLighthouse.x,shoreLighthouse.y,105,0,TAU);ctx.stroke();ctx.setLineDash([]);text('거문도등대 · 최종 작업 지점',shoreLighthouse.x,shoreLighthouse.y+110,18,'#fff','center',1000);
   // player
-  ctx.save();ctx.translate(shorePlayer.x,shorePlayer.y);ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(0,25,25,10,0,0,TAU);ctx.fill();ctx.fillStyle='#ffd35a';rr(-15,-30,30,28,8);ctx.fill();ctx.fillStyle='#fff';rr(-19,-2,38,36,9);ctx.fill();ctx.fillStyle='#4fa8f1';rr(-19,34,38,12,6);ctx.fill();ctx.restore();text('점검원',shorePlayer.x,shorePlayer.y-42,13,'#23436f','center',1000);
+  {const wp=shorePlayer.walkPhase||0,bob=shorePlayer.moving?Math.sin(wp*2)*2:0,step=shorePlayer.moving?Math.sin(wp)*8:0;ctx.save();ctx.translate(shorePlayer.x,shorePlayer.y+bob);ctx.scale(shorePlayer.facing||1,1);ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(0,30,24,9,0,0,TAU);ctx.fill();ctx.strokeStyle='#263442';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-8,23);ctx.lineTo(-10+step*.35,42);ctx.moveTo(8,23);ctx.lineTo(10-step*.35,42);ctx.stroke();ctx.fillStyle='#eef3f4';rr(-17,-5,34,31,7);ctx.fill();ctx.fillStyle='#f0b33c';rr(-17,-8,34,8,4);ctx.fill();ctx.fillStyle='#1f475a';rr(-14,5,28,11,3);ctx.fill();ctx.fillStyle='#d7a57b';ctx.beginPath();ctx.arc(0,-20,12,0,TAU);ctx.fill();ctx.fillStyle='#f2c94c';ctx.beginPath();ctx.arc(0,-24,14,Math.PI,TAU);ctx.fill();ctx.strokeStyle='#eef3f4';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-14,2);ctx.lineTo(-24-step*.22,13);ctx.moveTo(14,2);ctx.lineTo(24+step*.22,13);ctx.stroke();ctx.restore();text('점검원',shorePlayer.x,shorePlayer.y-47+bob,11,'#173b4c','center',800)}
   text(shoreMode==='toBoat'?'수리가 끝났습니다 · 선착장으로 돌아가 정비선에 승선하세요':'배에서 내려 등대까지 직접 올라가세요',W*.5,80,27,'#fff','center',1000);
 }

@@ -1,7 +1,7 @@
 'use strict';
 // 게임 전체 오디오: 사무실 분위기, 전화벨, 60초 긴박음, 바다/파도, 갈매기 효과음
 // 외부 음원 파일 없이 Web Audio API로 생성합니다.
-const gameAudio={ctx:null,master:null,mode:null,modeNodes:[],timers:[],intervals:[],phoneTimers:[],unlocked:false,noiseBuffer:null};
+const gameAudio={ctx:null,master:null,mode:null,modeNodes:[],timers:[],intervals:[],phoneTimers:[],unlocked:false,noiseBuffer:null,engineOsc:null,engineGain:null};
 
 function getGameAudioContext(){return gameAudio.ctx}
 function gameAudioUnlocked(){return !!(gameAudio.unlocked&&gameAudio.ctx&&gameAudio.ctx.state==='running')}
@@ -22,7 +22,7 @@ function clearModeAudio(){
  for(const id of gameAudio.intervals)clearInterval(id);gameAudio.intervals.length=0;
  for(const id of gameAudio.timers)clearTimeout(id);gameAudio.timers.length=0;
  for(const n of gameAudio.modeNodes){try{if(n.stop)n.stop()}catch(_){}try{n.disconnect()}catch(_){}}gameAudio.modeNodes.length=0;
- gameAudio.mode=null;
+ gameAudio.mode=null;gameAudio.engineOsc=null;gameAudio.engineGain=null;
 }
 function clearPhoneTimers(){for(const id of gameAudio.phoneTimers)clearTimeout(id);gameAudio.phoneTimers.length=0}
 function startLoopNoise({gain=.04,lowpass=900,highpass=0,rate=1,lfoHz=0,lfoDepth=0}={}){
@@ -46,10 +46,31 @@ function startGatherMusic(){
  startLoopNoise({gain:.010,lowpass:500,highpass:80,rate:1.08,lfoHz:.35,lfoDepth:.003});
  let beat=0;const pulse=()=>{if(gameAudio.mode!=='gather'||!gameAudioUnlocked())return;const rem=Math.max(0,gatherEnd-performance.now()),urgent=rem<10000;softTone(beat%2?164.81:130.81,urgent?.13:.22,urgent?.038:.024,0,'square');if(urgent)softTone(659.25,.055,.020,.12,'triangle');beat++};pulse();const id=setInterval(pulse,420);gameAudio.intervals.push(id)
 }
+function playWaveBreak(level=1){
+ const ac=gameAudio.ctx;if(!gameAudioUnlocked()||!gameAudio.noiseBuffer)return;
+ const src=ac.createBufferSource();src.buffer=gameAudio.noiseBuffer;src.playbackRate.value=.72+Math.random()*.18;
+ const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=80;
+ const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1050+Math.random()*500;
+ const g=ac.createGain(),t=ac.currentTime+.01,d=.9+Math.random()*.7;
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.075*level,t+.16);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(gameAudio.master);src.start(t);src.stop(t+d+.05);
+}
 function startSeaAmbience(level=1){
- // 파도: 저역 노이즈 + 느린 음량 파동. 바람: 고역 노이즈를 아주 작게 겹침.
- startLoopNoise({gain:.105*level,lowpass:780,highpass:45,rate:.82,lfoHz:.085,lfoDepth:.045*level});
- startLoopNoise({gain:.018*level,lowpass:2600,highpass:650,rate:1.12,lfoHz:.13,lfoDepth:.006*level});
+ // 바람보다 파도가 주인공이 되도록 저역의 물결과 부서지는 파도를 분리해 믹스합니다.
+ startLoopNoise({gain:.145*level,lowpass:620,highpass:38,rate:.76,lfoHz:.075,lfoDepth:.052*level});
+ startLoopNoise({gain:.042*level,lowpass:1500,highpass:110,rate:.94,lfoHz:.17,lfoDepth:.012*level});
+ // 바람은 배경에만 남깁니다.
+ startLoopNoise({gain:.0065*level,lowpass:2700,highpass:800,rate:1.08,lfoHz:.11,lfoDepth:.0025*level});
+ const wave=()=>{if(gameAudio.mode!=='sail'||!gameAudioUnlocked())return;playWaveBreak(level);const id=setTimeout(wave,2600+Math.random()*3200);gameAudio.timers.push(id)};
+ const id=setTimeout(wave,900+Math.random()*1400);gameAudio.timers.push(id);
+ // 정비선 엔진의 저역을 아주 작게 더해 속도 변화가 귀로도 느껴지게 합니다.
+ const ac=gameAudio.ctx,osc=ac.createOscillator(),eg=ac.createGain();osc.type='sine';osc.frequency.value=58;eg.gain.value=.003;osc.connect(eg);eg.connect(gameAudio.master);rememberNode(osc,eg);osc.start();gameAudio.engineOsc=osc;gameAudio.engineGain=eg;
+}
+function updateSeaAudioDynamics(speedRatio=0,weatherType=null){
+ if(!gameAudioUnlocked()||gameAudio.mode!=='sail'||!gameAudio.engineOsc||!gameAudio.engineGain)return;
+ const ac=gameAudio.ctx,s=clamp(Number(speedRatio)||0,0,1),storm=weatherType==='storm'?1:0;
+ gameAudio.engineOsc.frequency.setTargetAtTime(56+s*42,ac.currentTime,.12);
+ gameAudio.engineGain.gain.setTargetAtTime(.003+s*.017+storm*.002,ac.currentTime,.16);
 }
 function startRepairAmbience(){startSeaAmbience(.42);startLoopNoise({gain:.008,lowpass:380,highpass:70,rate:.7,lfoHz:.08,lfoDepth:.002})}
 function setGameAudioMode(mode,force=false){
@@ -72,5 +93,5 @@ function playRepairSuccessSound(){if(!gameAudioUnlocked())return;softTone(523.25
 function playSeagullCall(){
  if(!gameAudioUnlocked())return;const ac=gameAudio.ctx,t0=ac.currentTime+.02;
  const call=(start,dur,f1,f2,vol)=>{const osc=ac.createOscillator(),gain=ac.createGain(),filter=ac.createBiquadFilter();osc.type='triangle';osc.frequency.setValueAtTime(f1,start);osc.frequency.exponentialRampToValueAtTime(f2,start+dur*.75);filter.type='bandpass';filter.frequency.value=1100;filter.Q.value=.8;gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(vol,start+.045);gain.gain.exponentialRampToValueAtTime(.0001,start+dur);osc.connect(filter);filter.connect(gain);gain.connect(gameAudio.master);osc.start(start);osc.stop(start+dur+.02)};
- call(t0,.30,1550,760,.045);call(t0+.36,.34,1340,650,.040)
+ call(t0,.30,1550,760,.070);call(t0+.34,.32,1390,680,.060);if(Math.random()>.48)call(t0+.72,.26,1640,820,.045)
 }

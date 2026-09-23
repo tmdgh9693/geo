@@ -13,9 +13,13 @@ function updateOffice(dt, now) {
             if(action) interact();
         }else{ dx=tx/d; dy=ty/d; }
     }
+    const moving=Math.abs(dx)+Math.abs(dy)>.001;
     const l = Math.hypot(dx, dy) || 1;
     player.x = clamp(player.x + dx / l * player.speed * dt, 70, 1845);
     player.y = clamp(player.y + dy / l * player.speed * dt, 145, 1015);
+    player.moving=moving;
+    if(moving){ if(Math.abs(dx)>.05)player.facing=dx<0?-1:1; player.walkPhase=(player.walkPhase||0)+dt*9.5; }
+    else player.walkPhase=(player.walkPhase||0)*.88;
     if (phase === 'gather') {
         if(tutorialMode){ui.hudLabel.textContent='TUTORIAL';ui.hudMain.textContent='연습';ui.hudSub.textContent='예비배터리를 챙긴 뒤 출동 게이트로 이동';}
         else {const rem = Math.max(0, gatherEnd - now);ui.hudMain.textContent = `00:${String(Math.ceil(rem / 1000)).padStart(2, '0')}`;if (rem <= 0) startSail();}
@@ -65,6 +69,7 @@ function updateShip(dt, now) {
     if(activeWeather?.type==='storm')ship.speed*=Math.exp(-dt*.045);
 
     const sr=clamp(Math.abs(ship.speed)/ship.maxFwd,0,1);
+    if(typeof updateSeaAudioDynamics==='function')updateSeaAudioDynamics(sr,activeWeather?.type||null);
     // 저속에서도 조타가 느껴지고, 후진 시에는 조타 방향이 자연스럽게 반전됩니다.
     const steerAuthority=.16+.46*sr;
     const targetYaw=ship.rudder*steerAuthority*(ship.speed>=0?1:-1);

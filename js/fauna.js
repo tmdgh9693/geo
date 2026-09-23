@@ -34,7 +34,7 @@ function buildFaunaForRoute(){
  for(let i=0;i<3;i++){
   const p=randomRouteWaterPoint(.95);fauna.dolphins.push({x:p.x,y:p.y,heading:Math.random()*TAU,speed:34+Math.random()*24,phase:Math.random()*TAU});
  }
- nextGullCall=performance.now()+9000+Math.random()*12000;
+ nextGullCall=performance.now()+6500+Math.random()*8500;
 }
 
 function updateFauna(dt,now){
@@ -45,13 +45,16 @@ function updateFauna(dt,now){
  maybePlayGull(now);
 }
 
-function unlockWildlifeAudio(){if(typeof unlockGameAudio==='function')unlockGameAudio();nextGullCall=performance.now()+7000+Math.random()*10000}
+function unlockWildlifeAudio(){if(typeof unlockGameAudio==='function')unlockGameAudio();nextGullCall=performance.now()+4500+Math.random()*6500}
 function gullNearShip(){return fauna.gulls.some(g=>dist(ship.x,ship.y,g.x,g.y)<3000)}
 function maybePlayGull(now){
  if(typeof gameAudioUnlocked!=='function'||!gameAudioUnlocked())return;
- if(!(phase==='sail'||phase==='dock'))return;
- if(now<nextGullCall||!gullNearShip())return;
- playGullCall();nextGullCall=now+16000+Math.random()*22000;
+ if(!(phase==='sail'||phase==='dock'||phase==='verify'||phase==='return'))return;
+ if(now<nextGullCall)return;
+ // 갈매기가 멀리 있어도 해안 환경음으로 가끔 들리고, 가까우면 조금 더 자주 들립니다.
+ const near=gullNearShip();
+ if(near||Math.random()>.28)playGullCall();
+ nextGullCall=now+(near?9500:13500)+Math.random()*(near?10500:14500);
 }
 function playGullCall(){if(typeof playSeagullCall==='function')playSeagullCall()}
 

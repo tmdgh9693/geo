@@ -1,6 +1,6 @@
 'use strict';
 // 스테이지별 신고, 사무실/파밍, 준비물 관리
-const player = { x: 250, y: 780, speed: 300 };
+const player = { x: 250, y: 780, speed: 300, moving:false, facing:1, walkPhase:0 }; 
 let inventory = [], load = 0, maxLoad = 55, currentMission = null;
 let officeMoveTarget=null, officeAutoAction=null;
 
